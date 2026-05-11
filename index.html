@@ -260,7 +260,7 @@ function setStatus(id, type, msg) {
 
 async function getToken() {
   const msalInst = await getMsal();
-  const scopes = ['Files.Read', 'Sites.Read.All'];
+  const scopes = ['Files.Read', 'User.Read'];
   const accounts = msalInst.getAllAccounts();
   try {
     if (accounts.length > 0) {
@@ -300,7 +300,7 @@ async function loadFromSharePoint() {
     switchTabEl('zd');
   } catch(e) {
     console.error(e);
-    alert('불러오기 실패: ' + e.message + '\n\n확인사항:\n① Azure AD 앱에 Files.Read, Sites.Read.All 권한 추가\n② 관리자 동의 클릭\n③ 리디렉션 URI에 이 페이지 URL 등록');
+    alert('불러오기 실패: ' + e.message + '\n\n확인사항:\n① Azure AD 앱에 Files.Read, User.Read 권한 추가 (사용자 동의로 가능)\n② 리디렉션 URI(SPA)에 이 페이지 URL 등록');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '↻ SharePoint에서 불러오기';
