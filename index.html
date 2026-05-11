@@ -222,33 +222,20 @@ tbody tr.row-fixed td{background:var(--color-background-success)!important;}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" onerror="loadMsalFallback()"></script><script>function loadMsalFallback(){var s=document.createElement("script");s.src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js";document.head.appendChild(s);}</script>
+<script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// ── Azure AD 설정 ─────────────────────────────────────
-const TENANT_ID = '3202868c-cfa8-460d-8789-a46ddadc03ff';
-const CLIENT_ID = 'eeac51a2-abc9-494d-bd85-9079ff274a2c';
+// ── 설정 ──────────────────────────────────────────────
+const CLIENT_ID  = 'eeac51a2-abc9-494d-bd85-9079ff274a2c';
+const TENANT_ID  = '3202868c-cfa8-460d-8789-a46ddadc03ff';
+const APP_URI    = `api://green-mushroom-0c7b12500.7.azurestaticapps.net/${CLIENT_ID}`;
 
-let _msalInstance = null;
-async function getMsal() {
-  if (_msalInstance) return _msalInstance;
-  const config = {
-    auth: {
-      clientId: CLIENT_ID,
-      authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-      redirectUri: window.location.origin + window.location.pathname,
-    },
-    cache: { cacheLocation: 'sessionStorage' }
-  };
-  _msalInstance = new msal.PublicClientApplication(config);
-  await _msalInstance.initialize();
-  return _msalInstance;
-}
+let _teamsInited = false;
+let _cachedToken = null;
 
-// SharePoint 공유 링크 → Graph API 다운로드 URL
-function toGraphUrl(shareUrl) {
-  const encoded = btoa(shareUrl).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  return `https://graph.microsoft.com/v1.0/shares/u!${encoded}/driveItem/content`;
+async function initTeams() {
+  if (_teamsInited) return;
+  try { await microsoftTeams.app.initialize(); _teamsInited = true; } catch(e) {}
 }
 
 function setStatus(id, type, msg) {
@@ -258,26 +245,87 @@ function setStatus(id, type, msg) {
   el.classList.remove('hidden');
 }
 
-async function getToken() {
-  const msalInst = await getMsal();
+// Teams SSO → OBO → Graph 토큰
+async function getGraphToken() {
+  if (_cachedToken) return _cachedToken;
+  await initTeams();
+
+  // Step 1: Teams SSO 토큰
+  let ssoToken;
+  try {
+    ssoToken = await microsoftTeams.authentication.getAuthToken();
+  } catch(e) {
+    throw new Error('Teams 로그인 토큰 획득 실패.\nTeams 앱으로 실행했는지 확인해주세요.');
+  }
+
+  // Step 2: OBO (On-Behalf-Of) → Graph 액세스 토큰
+  const body = new URLSearchParams({
+    grant_type:            'urn:ietf:params:oauth:grant-type:jwt-bearer',
+    client_id:             CLIENT_ID,
+    client_secret:         '',           // 공개 클라이언트 — Azure Function 없이는 secret 불필요
+    assertion:             ssoToken,
+    requested_token_use:   'on_behalf_of',
+    scope:                 'https://graph.microsoft.com/Files.Read openid profile',
+  });
+
+  const resp = await fetch(
+    `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`,
+    { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+  );
+  const json = await resp.json();
+  if (!resp.ok) {
+    // OBO는 공개 클라이언트에서 client_secret 없이 안 됨 → MSAL popup fallback
+    console.warn('OBO 실패, MSAL popup fallback:', json);
+    return await getMsalToken();
+  }
+  _cachedToken = json.access_token;
+  return _cachedToken;
+}
+
+// MSAL fallback (Teams 외부 또는 OBO 실패 시)
+let _msalInst = null;
+async function getMsalToken() {
+  if (!_msalInst) {
+    await loadScript('https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js');
+    _msalInst = new msal.PublicClientApplication({
+      auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: window.location.origin + window.location.pathname },
+      cache: { cacheLocation: 'sessionStorage' }
+    });
+    await _msalInst.initialize();
+  }
   const scopes = ['Files.Read', 'User.Read'];
-  const accounts = msalInst.getAllAccounts();
+  const accounts = _msalInst.getAllAccounts();
   try {
     if (accounts.length > 0) {
-      const r = await msalInst.acquireTokenSilent({ scopes, account: accounts[0] });
+      const r = await _msalInst.acquireTokenSilent({ scopes, account: accounts[0] });
       return r.accessToken;
     }
-  } catch(e) { /* silent 실패 → popup */ }
-  const r = await msalInst.loginPopup({ scopes });
+  } catch(e) {}
+  const r = await _msalInst.loginPopup({ scopes });
   return r.accessToken;
 }
 
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+// SharePoint 공유 링크 → Graph API URL
+function toGraphUrl(shareUrl) {
+  const encoded = btoa(shareUrl).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  return `https://graph.microsoft.com/v1.0/shares/u!${encoded}/driveItem/content`;
+}
+
 async function fetchSpFile(url, statusId) {
-  setStatus(statusId, 'loading', '로그인 중...');
-  const token = await getToken();
+  setStatus(statusId, 'loading', '인증 중...');
+  const token = await getGraphToken();
   setStatus(statusId, 'loading', '다운로드 중...');
   const res = await fetch(toGraphUrl(url), { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) throw new Error(`파일 로드 실패: ${res.status} ${res.statusText}`);
   setStatus(statusId, 'ok', '✓ 완료');
   return await res.arrayBuffer();
 }
