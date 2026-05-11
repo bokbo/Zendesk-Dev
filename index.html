@@ -136,8 +136,9 @@ tbody tr.row-fixed td{background:var(--color-background-success)!important;}
       <button class="btn-primary" onclick="loadFromSharePoint()" id="btn-sp-load">
         ↻ SharePoint에서 불러오기
       </button>
-      <span style="font-size:11px;color:var(--color-text-tertiary)">처음 실행 시 Microsoft 로그인 팝업이 뜹니다</span>
     </div>
+    <div id="sp-error-box" class="hidden" style="margin-top:10px;background:var(--color-background-danger);border:0.5px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;color:var(--color-text-danger);line-height:1.6;"></div>
+    <div id="sp-info-box" class="hidden" style="margin-top:10px;background:var(--color-background-info);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;color:var(--color-text-info);line-height:1.6;"></div>
   </div>
 </div>
 
@@ -225,6 +226,46 @@ tbody tr.row-fixed td{background:var(--color-background-success)!important;}
 <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+
+// ── 인라인 메시지 헬퍼 ────────────────────────────────
+function showError(msg, boxId) {
+  const id = boxId || 'sp-error-box';
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = msg.replace(/\n/g,'<br>'); el.classList.remove('hidden'); }
+  else console.error(msg);
+}
+function hideError(boxId) {
+  const id = boxId || 'sp-error-box';
+  const el = document.getElementById(id);
+  if (el) el.classList.add('hidden');
+}
+function showInfo(msg, boxId) {
+  const id = boxId || 'sp-info-box';
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = msg.replace(/\n/g,'<br>'); el.classList.remove('hidden'); }
+}
+function hideInfo(boxId) {
+  const id = boxId || 'sp-info-box';
+  const el = document.getElementById(id);
+  if (el) el.classList.add('hidden');
+}
+// 결과영역 상단 토스트 (집계 에러용)
+function showToast(msg, type) {
+  let el = document.getElementById('inline-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'inline-toast';
+    el.style.cssText = 'margin:8px 0;padding:8px 12px;border-radius:4px;font-size:12px;line-height:1.5;';
+    const ra = document.getElementById('result-area');
+    if (ra) ra.prepend(el);
+  }
+  el.style.background = type === 'error' ? 'var(--color-background-danger)' : 'var(--color-background-warning)';
+  el.style.color = type === 'error' ? 'var(--color-text-danger)' : 'var(--color-text-warning)';
+  el.innerHTML = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
 // ── 설정 ──────────────────────────────────────────────
 const CLIENT_ID  = 'eeac51a2-abc9-494d-bd85-9079ff274a2c';
 const TENANT_ID  = '3202868c-cfa8-460d-8789-a46ddadc03ff';
@@ -333,7 +374,8 @@ async function fetchSpFile(url, statusId) {
 async function loadFromSharePoint() {
   const urlZd = document.getElementById('sp-url-zd').value.trim();
   const urlMo = document.getElementById('sp-url-mo').value.trim();
-  if (!urlZd) return alert('젠데스크 파일 링크를 입력해주세요.');
+  if (!urlZd) { showError('젠데스크 파일 SharePoint 링크를 입력해주세요.'); return; }
+  hideError(); hideInfo();
   const btn = document.getElementById('btn-sp-load');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>불러오는 중...';
@@ -348,7 +390,7 @@ async function loadFromSharePoint() {
     switchTabEl('zd');
   } catch(e) {
     console.error(e);
-    alert('불러오기 실패: ' + e.message + '\n\n확인사항:\n① Azure AD 앱에 Files.Read, User.Read 권한 추가 (사용자 동의로 가능)\n② 리디렉션 URI(SPA)에 이 페이지 URL 등록');
+    showError('불러오기 실패: ' + e.message + '\n\n확인사항:\n① Azure AD 앱에 Files.Read, User.Read 권한 추가\n② 리디렉션 URI(SPA)에 이 페이지 URL 등록');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '↻ SharePoint에서 불러오기';
@@ -417,7 +459,7 @@ function getEffEnd(row){const m=parseDate(row[zdEndCol]);if(m)return m;const f=p
 
 function calc(){
   const wf=document.getElementById('filter-worker').value,ws=document.getElementById('week-start').value;
-  if(!ws)return alert('기준 주 시작일을 선택하세요.');
+  if(!ws){ showToast('기준 주 시작일을 선택해주세요.','warn'); return; }
   const prevStart=new Date(ws),prevEnd=addDays(prevStart,6);
   zdStatusCol=findZdCol(['티켓 상태','상태','status'])||'';zdSysCol=findZdCol(['대상시스템','system','product'])||'';
   zdOrgCol=findZdCol(['조직','organization','org'])||'';zdTitleCol=findZdCol(['제목','title','subject'])||'';
