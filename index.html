@@ -222,7 +222,7 @@ tbody tr.row-fixed td{background:var(--color-background-success)!important;}
   </div>
 </div>
 
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" onerror="loadMsalFallback()"></script><script>function loadMsalFallback(){var s=document.createElement("script");s.src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js";document.head.appendChild(s);}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ── Azure AD 설정 ─────────────────────────────────────
@@ -232,14 +232,15 @@ const CLIENT_ID = 'eeac51a2-abc9-494d-bd85-9079ff274a2c';
 let _msalInstance = null;
 async function getMsal() {
   if (_msalInstance) return _msalInstance;
-  _msalInstance = new msal.PublicClientApplication({
+  const config = {
     auth: {
       clientId: CLIENT_ID,
       authority: `https://login.microsoftonline.com/${TENANT_ID}`,
       redirectUri: window.location.origin + window.location.pathname,
     },
     cache: { cacheLocation: 'sessionStorage' }
-  });
+  };
+  _msalInstance = new msal.PublicClientApplication(config);
   await _msalInstance.initialize();
   return _msalInstance;
 }
