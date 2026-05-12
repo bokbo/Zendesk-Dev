@@ -173,6 +173,12 @@ table.dt tbody td.dc{white-space:nowrap;}
         </select>
       </div>
     </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button onclick="copyMonthlyTable()" id="btn-copy" style="font-size:12px;padding:5px 14px;display:flex;align-items:center;gap:5px;">
+        📋 고객시간·내부시간 복사
+      </button>
+    </div>
+    <div id="copy-toast" class="hidden" style="text-align:right;font-size:11px;color:var(--cg);margin-bottom:4px;">✓ 클립보드에 복사됐어요!</div>
     <div class="msc" id="msc"></div>
     <div class="mtw"><table><thead id="mth"></thead><tbody id="mtb"></tbody></table></div>
   </div>
@@ -1226,6 +1232,77 @@ function renderMonthly() {
 }
 
 function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;renderMonthly();}
+
+// ── 월별 테이블 복사 (고객시간·내부시간만) ───────────
+function copyMonthlyTable() {
+  const sel = document.getElementById('mms').value;
+  const tf  = document.getElementById('mtf').value;
+  const dm  = sel ? [sel] : moMonths;
+  const multiMonth = !sel && dm.length > 1;
+
+  // 필터된 사이트 목록
+  const filtered = SITE_ORDER.filter(site => !tf || getSiteType(site) === tf);
+
+  // 헤더 행 만들기
+  // 사이트 | (월별 고객H, 내부H 반복) | [합계 고객H, 내부H]
+  let header = ['사이트'];
+  dm.forEach(mo => { header.push(mo + ' 고객시간'); header.push(mo + ' 내부시간'); });
+  if (multiMonth) { header.push('합계 고객시간'); header.push('합계 내부시간'); }
+
+  const rows = [header];
+
+  filtered.forEach(site => {
+    const row = [site];
+    let sumC = 0, sumN = 0;
+    dm.forEach(mo => {
+      const v = (moData[mo] || {})[site] || { c: 0, n: 0 };
+      row.push(v.c.toFixed(2));
+      row.push(v.n.toFixed(2));
+      sumC += v.c; sumN += v.n;
+    });
+    if (multiMonth) { row.push(sumC.toFixed(2)); row.push(sumN.toFixed(2)); }
+    rows.push(row);
+  });
+
+  // 합계 행
+  const sumRow = ['합계'];
+  const sumByMo = {};
+  dm.forEach(mo => { sumByMo[mo] = { c: 0, n: 0 }; });
+  filtered.forEach(site => {
+    dm.forEach(mo => {
+      const v = (moData[mo] || {})[site] || { c: 0, n: 0 };
+      sumByMo[mo].c += v.c; sumByMo[mo].n += v.n;
+    });
+  });
+  let totalC = 0, totalN = 0;
+  dm.forEach(mo => {
+    sumRow.push(sumByMo[mo].c.toFixed(2));
+    sumRow.push(sumByMo[mo].n.toFixed(2));
+    totalC += sumByMo[mo].c; totalN += sumByMo[mo].n;
+  });
+  if (multiMonth) { sumRow.push(totalC.toFixed(2)); sumRow.push(totalN.toFixed(2)); }
+  rows.push(sumRow);
+
+  // 탭 구분 TSV로 변환 (엑셀 붙여넣기 호환)
+  const tsv = rows.map(r => r.join('\t')).join('\n');
+
+  navigator.clipboard.writeText(tsv).then(() => {
+    const toast = document.getElementById('copy-toast');
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 2500);
+  }).catch(() => {
+    // clipboard API 실패시 fallback
+    const ta = document.createElement('textarea');
+    ta.value = tsv;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const toast = document.getElementById('copy-toast');
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 2500);
+  });
+}
 
 // ── 티켓 집계 ────────────────────────────────────────
 function calc() {
