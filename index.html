@@ -1115,12 +1115,7 @@ function buildMonthlyData() {
     if(!effDate) return;
     
     // 2026-04 이후 데이터만 월별 집계에 포함
-    const y=effDate.getFullYear(), mo=effDate.getMonth()+1;
-    const ym=y*100+mo;
-    if(ym < 202604) return;
-
-    const y=effDate.getFullYear();
-    const m=effDate.getMonth()+1;
+    const y=effDate.getFullYear(), m=effDate.getMonth()+1;
     const monthKey=`${y}년${m}월`;
     monthSet.add(monthKey);
 
