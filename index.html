@@ -199,6 +199,9 @@ table.dt tbody td.dc{white-space:nowrap;}
           <option value="공유형">공유형</option>
         </select>
       </div>
+      <div class="fg" style="max-width:160px;"><label class="fl">처리자</label>
+        <select id="mfw" onchange="rebuildMonthly()"><option value="">전체</option></select>
+      </div>
     </div>
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
       <button onclick="copyMonthlyTable()" id="btn-copy" style="font-size:12px;padding:5px 14px;display:flex;align-items:center;gap:5px;">
@@ -1086,8 +1089,15 @@ function parseAll(wb, name) {
   const wSel=document.getElementById('fw');
   wSel.innerHTML='<option value="">전체</option>';
   const wc=fc(['처리자','assignee','agent']);
-  if(wc)[...new Set(ZR.map(r=>r[wc]).filter(Boolean))].sort().forEach(w=>{
+  const workers = wc ? [...new Set(ZR.map(r=>r[wc]).filter(Boolean))].sort() : [];
+  workers.forEach(w=>{
     const o=document.createElement('option');o.value=o.textContent=w;wSel.appendChild(o);
+  });
+  // 월별 탭 처리자 셀렉트도 동기화
+  const mwSel=document.getElementById('mfw');
+  mwSel.innerHTML='<option value="">전체</option>';
+  workers.forEach(w=>{
+    const o=document.createElement('option');o.value=o.textContent=w;mwSel.appendChild(o);
   });
 
   // 기본 날짜
@@ -1109,7 +1119,11 @@ function buildMonthlyData() {
   moData={};
   const monthSet=new Set();
 
+  const mwf = document.getElementById('mfw') ? document.getElementById('mfw').value : '';
+  const wc2 = fc(['처리자','assignee','agent']);
   ZR.forEach(r=>{
+    // 처리자 필터
+    if(mwf && wc2 && r[wc2] !== mwf) return;
     // 날짜: 종료일 없으면 업데이트시간
     const effDate = getEffDate(r);
     if(!effDate) return;
@@ -1387,6 +1401,11 @@ function closeMoDetail() {
   moDetailSite = null;
   document.getElementById('mo-dp').classList.add('hidden');
   document.querySelectorAll('.mtw table tbody tr').forEach(tr=>tr.classList.remove('mo-active'));
+}
+
+function rebuildMonthly(){
+  moData={};
+  buildMonthlyData();
 }
 
 function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;renderMonthly();}
