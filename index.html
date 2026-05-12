@@ -12,7 +12,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   --ci:#0f6cbd; --cg:#107c10; --cw:#835b00; --cd:#c4314b;
   --bg2:#f5f5f5; --bg3:#ebebeb;
   --bgi:#cce4f7; --bgg:#dff6dd; --bgw:#fff4ce; --bgd:#fde7ea;
-  --bd2:#d1d1d1; --bd3:#e0e0e0; --bdi:#0f6cbd; --bdw:#835b00;
+  --bd2:#d1d1d1; --bd3:#e0e0e0; --bdi:#0f6cbd;
   --rm:4px; --rl:8px;
 }
 @media (prefers-color-scheme:dark){
@@ -29,14 +29,14 @@ button:hover{background:var(--bg2);}
 .hidden{display:none;}
 .note{font-size:11px;color:var(--c3);margin-top:8px;}
 
-.upload-area{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem;}
-@media(max-width:600px){.upload-area{grid-template-columns:1fr;}}
-.drop-card{border:1.5px dashed var(--bd2);border-radius:var(--rl);padding:1.5rem 1rem;text-align:center;cursor:pointer;background:var(--bg2);transition:background 0.15s;}
-.drop-card:hover,.drop-card.dragover{background:var(--bg3);}
-.dc-label{font-size:12px;font-weight:600;color:var(--cs);margin-bottom:6px;}
-.dc-sub{font-size:11px;color:var(--c3);}
-.dc-ok{font-size:11px;color:var(--cg);margin-top:6px;font-weight:500;}
+/* 업로드 */
+.upload-card{border:1.5px dashed var(--bd2);border-radius:var(--rl);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--bg2);transition:background 0.15s;margin-bottom:1.25rem;}
+.upload-card:hover,.upload-card.dragover{background:var(--bg3);}
+.uc-label{font-size:12px;font-weight:600;color:var(--cs);margin-bottom:4px;}
+.uc-sub{font-size:11px;color:var(--c3);}
+.uc-ok{font-size:11px;color:var(--cg);margin-top:4px;font-weight:500;}
 
+/* 탭 */
 .tabs{display:flex;border-bottom:0.5px solid var(--bd3);margin-bottom:1.25rem;}
 .tb{padding:8px 18px;font-size:13px;font-weight:500;color:var(--cs);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;}
 .tb:hover{color:var(--ct);}
@@ -44,10 +44,12 @@ button:hover{background:var(--bg2);}
 .tp{display:none;}
 .tp.active{display:block;}
 
+/* 필터 */
 .fr{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:1.25rem 0;}
 .fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:150px;}
 .fl{font-size:12px;color:var(--cs);}
 
+/* 집계 테이블 (티켓) */
 .ctw{overflow-x:auto;border:0.5px solid var(--bd3);border-radius:var(--rl);margin-top:1rem;}
 .ct{width:100%;border-collapse:collapse;font-size:13px;}
 .ct thead th{position:sticky;top:0;z-index:2;background:var(--bg2);color:var(--cs);font-weight:500;padding:9px 14px;border-bottom:0.5px solid var(--bd3);white-space:nowrap;text-align:left;}
@@ -56,7 +58,7 @@ button:hover{background:var(--bg2);}
 .ct tbody tr:last-child{border-bottom:none;}
 .ct tbody tr:hover{background:var(--bg2);}
 .ct tbody tr.active{background:var(--bg2);outline:1px solid var(--bdi) inset;}
-.ct tbody tr.tr{font-weight:600;background:var(--bg2);cursor:default;}
+.ct tbody tr.trow{font-weight:600;background:var(--bg2);cursor:default;}
 .ct tbody td{padding:9px 14px;}
 .ct tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
 .cb{display:inline-block;min-width:28px;text-align:center;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:500;}
@@ -64,11 +66,14 @@ button:hover{background:var(--bg2);}
 .cbt{background:var(--bgi);color:var(--ci);}
 .cbr{background:var(--bgw);color:var(--cw);}
 .cb0{color:var(--c3);}
-.sb{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:500;}
-.ss{background:#e0f2fe;color:#0369a1;}
-.sp2{background:#fef3c7;color:#92400e;}
-.sc{background:#f0fdf4;color:#166534;}
 
+/* 시스템 유형 뱃지 */
+.sb{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:500;}
+.ss{background:#e0f2fe;color:#0369a1;}   /* 단독형 */
+.sp2{background:#fef3c7;color:#92400e;}  /* 유상 */
+.sc{background:#f0fdf4;color:#166534;}   /* 공유형 */
+
+/* 상세 패널 */
 .dp{margin-top:1rem;border:0.5px solid var(--bd3);border-radius:var(--rl);overflow:hidden;}
 .dh{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bd3);}
 .dt2{font-size:13px;font-weight:500;}
@@ -87,6 +92,7 @@ table.dt tbody td.dc{white-space:nowrap;}
 .dtab{padding:6px 14px;font-size:12px;font-weight:500;color:var(--cs);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;}
 .dtab.active{color:var(--ct);border-bottom-color:#6264a7;}
 
+/* 월별 탭 */
 .mfr{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem;}
 .msc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;}
 .mc{background:var(--bg2);border-radius:var(--rm);padding:0.85rem 1rem;}
@@ -95,36 +101,33 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mtw{overflow-x:auto;border:0.5px solid var(--bd3);border-radius:var(--rl);}
 .mtw table{width:100%;border-collapse:collapse;font-size:12px;}
 .mtw table thead th{position:sticky;top:0;background:var(--bg2);color:var(--cs);font-weight:500;text-align:left;padding:7px 12px;border-bottom:0.5px solid var(--bd3);white-space:nowrap;}
+.mtw table thead th.num{text-align:right;}
 .mtw table tbody tr{border-bottom:0.5px solid var(--bd3);}
 .mtw table tbody tr:hover{background:var(--bg2);}
+.mtw table tbody tr.sum-row{font-weight:600;background:var(--bg2);}
 .mtw table tbody td{padding:7px 12px;white-space:nowrap;}
+.mtw table tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
 .num{text-align:right;font-variant-numeric:tabular-nums;}
 </style>
 </head>
 <body>
 
-<div class="upload-area">
-  <div class="drop-card" id="dz" onclick="document.getElementById('fi-zd').click()">
-    <div class="dc-label">🎫 젠데스크 파일</div>
-    <div class="dc-sub">CSV / XLSX 드래그 또는 클릭</div>
-    <div class="dc-ok hidden" id="lbl-zd"></div>
-    <input type="file" id="fi-zd" accept=".csv,.xlsx,.xls" style="display:none">
-  </div>
-  <div class="drop-card" id="dm" onclick="document.getElementById('fi-mo').click()">
-    <div class="dc-label">📊 월별 처리시간 파일</div>
-    <div class="dc-sub">XLSX 드래그 또는 클릭 (선택)</div>
-    <div class="dc-ok hidden" id="lbl-mo"></div>
-    <input type="file" id="fi-mo" accept=".xlsx,.xls" style="display:none">
-  </div>
+<!-- 파일 업로드 -->
+<div class="upload-card" id="dz" onclick="document.getElementById('fi-zd').click()">
+  <div class="uc-label">🎫 젠데스크 파일 업로드</div>
+  <div class="uc-sub">CSV / XLSX 드래그 또는 클릭 — 티켓 집계 + 월별 처리시간 모두 이 파일 하나로</div>
+  <div class="uc-ok hidden" id="lbl-zd"></div>
+  <input type="file" id="fi-zd" accept=".csv,.xlsx,.xls" style="display:none">
 </div>
 
+<!-- 결과 -->
 <div id="main-area" class="hidden">
   <div class="tabs">
     <button class="tb active" onclick="stab('zd',this)" id="tab-zd">🎫 티켓 집계</button>
     <button class="tb" onclick="stab('mo',this)" id="tab-mo">📊 월별 처리시간</button>
   </div>
 
-  <!-- 티켓 집계 -->
+  <!-- 티켓 집계 탭 -->
   <div class="tp active" id="panel-zd">
     <div class="fr">
       <div class="fg"><label class="fl">처리자</label><select id="fw"><option value="">전체</option></select></div>
@@ -155,43 +158,92 @@ table.dt tbody td.dc{white-space:nowrap;}
     </div>
   </div>
 
-  <!-- 월별 처리시간 -->
+  <!-- 월별 처리시간 탭 -->
   <div class="tp" id="panel-mo">
-    <div id="mo-empty" style="padding:2rem;text-align:center;font-size:13px;color:var(--c3);">월별 처리시간 파일을 위에서 업로드해주세요.</div>
-    <div id="mo-content" class="hidden">
-      <div class="mfr">
-        <div class="fg" style="max-width:200px;"><label class="fl">월 선택</label><select id="mms" onchange="rm()"><option value="">전체 (합산)</option></select></div>
-        <div class="fg" style="max-width:200px;"><label class="fl">고객사 검색</label><input type="text" id="msearch" placeholder="사이트명..." oninput="rm()"></div>
-        <div class="fg" style="max-width:150px;"><label class="fl">시스템 유형</label>
-          <select id="mtf" onchange="rm()">
-            <option value="">전체</option>
-            <option value="단독형">단독형</option>
-            <option value="유상">유상</option>
-            <option value="공유형">공유형</option>
-          </select>
-        </div>
-        <div class="fg" style="max-width:180px;"><label class="fl">정렬</label>
-          <select id="msort" onchange="rm()">
-            <option value="site">사이트명</option>
-            <option value="type">시스템 유형</option>
-            <option value="cd">고객시간 높은 순</option>
-            <option value="ca">고객시간 낮은 순</option>
-            <option value="nd">내부시간 높은 순</option>
-            <option value="md">M/M 높은 순</option>
-          </select>
-        </div>
+    <div class="mfr">
+      <div class="fg" style="max-width:200px;"><label class="fl">월 선택</label>
+        <select id="mms" onchange="renderMonthly()"><option value="">전체 (합산)</option></select>
       </div>
-      <div class="msc" id="msc"></div>
-      <div class="mtw"><table><thead id="mth"></thead><tbody id="mtb"></tbody></table></div>
-      <div class="note" id="mn" style="margin-top:8px;"></div>
+      <div class="fg" style="max-width:150px;"><label class="fl">시스템 유형</label>
+        <select id="mtf" onchange="renderMonthly()">
+          <option value="">전체</option>
+          <option value="단독형">단독형</option>
+          <option value="유상">유상</option>
+          <option value="공유형">공유형</option>
+        </select>
+      </div>
     </div>
+    <div class="msc" id="msc"></div>
+    <div class="mtw"><table><thead id="mth"></thead><tbody id="mtb"></tbody></table></div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// ── 사이트 → 시스템 유형 매핑 ────────────────────────
-const SITE_TYPE = {
+// ── 사이트 정의 (이미지 순서 고정) ────────────────────
+// 대상시스템 기준 시스템 유형 분류
+// 단독형: [무상] GoWorks
+// 유상: [ATGC], [CINOS]/[Cinos], [코리안리], [세아윈드], [파카코리아], [ISLT], [PACM], [인알파코리아], [부릉], [킨코스]
+// 공유형: [공유형] GoWorks, [고우넷] GoWorks
+
+function getSysType(sys) {
+  const s = (sys||'').trim();
+  if (s.includes('[공유형]') || s.includes('[고우넷]') || s.includes('[고우아이티]')) return '공유형';
+  if (s.includes('[무상]')) return '단독형';
+  // 유상: 나머지 전부
+  return '유상';
+}
+
+// 사이트 표시명 고정 목록 (이미지 순서)
+const SITE_ORDER = [
+  '(주)SHL','ATGC','DDI(D&D Investm)','MSHC','VIG Partners',
+  '간석목재산업','대한금속','보고펀드','부릉','브릿지바이오테라퓨틱스',
+  '빌릭스','세아윈드','스탠다임','싸이노스','아이트릭스테크놀로지',
+  '와이제이링크','인알파','일성 ISLT','정기산업','중헌제약',
+  '코리안리','칸테크','킨코스코리아','트루인포','파낙스홀딩스',
+  '파카코리아','한일중협력사업국','화일약품','그리티','PACM자산운용',
+  '공유형',
+];
+
+// 조직명 → 사이트 표시명 매핑
+const ORG_TO_SITE = {
+  'SHL':'(주)SHL','ATGC':'ATGC','DND':'DDI(D&D Investm)','MSHC':'MSHC',
+  'VIG파트너스':'VIG Partners','간석목재산업':'간석목재산업','대한금속':'대한금속',
+  '보고펀드':'보고펀드','Vroong':'부릉','브릿지바이오테라퓨틱스':'브릿지바이오테라퓨틱스',
+  'Bilix':'빌릭스','세아윈드':'세아윈드','스탠다임':'스탠다임','싸이노스':'싸이노스',
+  '아이트릭스테크놀로지':'아이트릭스테크놀로지','와이제이링크':'와이제이링크',
+  '인알파코리아':'인알파','ISLT':'일성 ISLT','정기산업':'정기산업','중헌제약':'중헌제약',
+  '코리안리':'코리안리','Khantech':'칸테크','킨코스코리아':'킨코스코리아',
+  'Trueinfo':'트루인포','파낙스홀딩스':'파낙스홀딩스','파카코리아':'파카코리아',
+  '한중일협력사무국':'한일중협력사업국','화일약품':'화일약품','Gritee':'그리티',
+  'PACM자산운용':'PACM자산운용','Parataxis':'스탠다임',
+};
+
+// 대상시스템 기준 사이트명 매핑 (조직이 없거나 GowIT일 때)
+function getSiteName(org, sys) {
+  const o = (org||'').trim();
+  const s = (sys||'').trim();
+  // 공유형 계열
+  if (s.includes('[공유형]') || s.includes('[고우넷]') || s.includes('[고우아이티]')) return '공유형';
+  // 조직명으로 찾기
+  if (o && o !== 'GowIT' && o !== 'Gownet' && ORG_TO_SITE[o]) return ORG_TO_SITE[o];
+  // 대상시스템으로 찾기
+  if (s.includes('[ATGC]')) return 'ATGC';
+  if (s.includes('[CINOS]') || s.toLowerCase().includes('[cinos]')) return '싸이노스';
+  if (s.includes('[코리안리]')) return '코리안리';
+  if (s.includes('[세아윈드]')) return '세아윈드';
+  if (s.includes('[파카코리아]')) return '파카코리아';
+  if (s.includes('[ISLT]')) return '일성 ISLT';
+  if (s.includes('[PACM]')) return 'PACM자산운용';
+  if (s.includes('[인알파코리아]')) return '인알파';
+  if (s.includes('[부릉]')) return '부릉';
+  if (s.includes('[킨코스]')) return '킨코스코리아';
+  if (s.includes('[무상]')) return ORG_TO_SITE[o] || o || '기타';
+  return o || '기타';
+}
+
+// 사이트명 → 시스템 유형
+const SITE_TYPE_MAP = {
   '(주)SHL':'단독형','ATGC':'유상','DDI(D&D Investm)':'단독형','MSHC':'단독형',
   'VIG Partners':'단독형','간석목재산업':'단독형','대한금속':'단독형','보고펀드':'단독형',
   '부릉':'유상','브릿지바이오테라퓨틱스':'단독형','빌릭스':'단독형','세아윈드':'유상',
@@ -199,93 +251,272 @@ const SITE_TYPE = {
   '인알파':'유상','일성 ISLT':'유상','정기산업':'단독형','중헌제약':'단독형',
   '코리안리':'유상','칸테크':'단독형','킨코스코리아':'단독형','트루인포':'단독형',
   '파낙스홀딩스':'단독형','파카코리아':'유상','한일중협력사업국':'단독형','화일약품':'단독형',
-  '그리티':'단독형','PACM자산운용':'유상','공유형':'공유형','Parataxis':'단독형',
+  '그리티':'단독형','PACM자산운용':'유상','공유형':'공유형',
 };
-function gtype(site){ return SITE_TYPE[site]||'단독형'; }
-function tbadge(t){ const c=t==='유상'?'sp2':t==='공유형'?'sc':'ss'; return `<span class="sb ${c}">${t}</span>`; }
+function getSiteType(site) { return SITE_TYPE_MAP[site] || '단독형'; }
+function tbadge(t) {
+  const c = t==='유상'?'sp2':t==='공유형'?'sc':'ss';
+  return `<span class="sb ${c}">${t}</span>`;
+}
 
-// 고객사 레이블 → 시스템 유형
+// ── 고객사 분류 (티켓 집계용) ────────────────────────
+const CM = [
+  {l:'무상',     s:s=>s.includes('[무상]'),                    o:o=>false},
+  {l:'세아윈드', s:s=>s.includes('[세아윈드]'),                o:o=>o.includes('세아윈드')},
+  {l:'싸이노스', s:s=>s.includes('[CINOS]')||s.toLowerCase().includes('[cinos]'), o:o=>o.includes('싸이노스')},
+  {l:'코리안리', s:s=>s.includes('[코리안리]'),                o:o=>o.includes('코리안리')},
+  {l:'부릉',     s:s=>s.includes('[부릉]'),                    o:o=>o==='Vroong'},
+  {l:'인알파',   s:s=>s.includes('[인알파코리아]'),             o:o=>o.includes('인알파')},
+  {l:'ATGC',    s:s=>s.includes('[ATGC]'),                    o:o=>o==='ATGC'},
+  {l:'ISLT',    s:s=>s.includes('[ISLT]'),                    o:o=>o==='ISLT'},
+  {l:'파카코리아',s:s=>s.includes('[파카코리아]'),               o:o=>o.includes('파카코리아')},
+  {l:'PACM',    s:s=>s.includes('[PACM]'),                    o:o=>o.includes('PACM')},
+  {l:'공유형',   s:s=>s.includes('[공유형]')||s.includes('[고우넷]')||s.includes('[고우아이티]'), o:o=>o==='Gownet'},
+  {l:'킨코스',   s:s=>s.includes('[킨코스]'),                  o:o=>o.includes('킨코스')},
+];
+const CLS = CM.map(c=>c.l), OL = '무상(기타)';
 const CL_TYPE = {
   '무상':'단독형','세아윈드':'유상','싸이노스':'유상','코리안리':'유상',
   '부릉':'유상','인알파':'유상','ATGC':'유상','ISLT':'유상',
-  '파카코리아':'유상','PACM':'유상','공유형':'공유형','기타':'-',
+  '파카코리아':'유상','PACM':'유상','공유형':'공유형','킨코스':'단독형',
+  '무상(기타)':'단독형',
 };
-
-// ── 고객사 분류 ───────────────────────────────────────
-const CM=[
-  {l:'무상',     s:s=>s.includes('[무상]')||s.includes('[아이트릭스테크놀로지]'),o:o=>o.includes('아이트릭스테크놀로지')},
-  {l:'세아윈드', s:s=>s.includes('[세아윈드]'),  o:o=>o.includes('세아윈드')},
-  {l:'싸이노스', s:s=>s.includes('[Cinos]')||s.toLowerCase().includes('[cinos]')||s.includes('[싸이노스]'),o:o=>o.includes('싸이노스')||o.toLowerCase()==='cinos'},
-  {l:'코리안리', s:s=>s.includes('[코리안리]'),  o:o=>o.includes('코리안리')},
-  {l:'부릉',     s:s=>s.includes('[부릉]'),      o:o=>o==='Vroong'||o.includes('부릉')},
-  {l:'인알파',   s:s=>s.includes('[인알파코리아]')||s.includes('[인알파]'),o:o=>o.includes('인알파')},
-  {l:'ATGC',    s:s=>s.includes('[ATGC]'),      o:o=>o==='ATGC'},
-  {l:'ISLT',    s:s=>s.includes('[ISLT]'),      o:o=>o==='ISLT'},
-  {l:'파카코리아',s:s=>s.includes('[파카코리아]'),o:o=>o.includes('파카코리아')},
-  {l:'PACM',    s:s=>s.includes('[PACM]'),      o:o=>o.includes('PACM')},
-  {l:'공유형',   s:s=>s.includes('[공유형]')||s.includes('[고우넷]'),o:o=>o==='Gownet'||o.includes('공유형')||o==='GoWIT'},
-];
-const CLS=CM.map(c=>c.l), OL='기타';
-function cc(sys,org){ const s=(sys||'').trim(),o=(org||'').trim(); for(const c of CM){if(c.s(s))return c.l;} for(const c of CM){if(c.o(o))return c.l;} return OL; }
+function cc(sys, org) {
+  const s=(sys||'').trim(), o=(org||'').trim();
+  for(const c of CM){if(c.s(s))return c.l;}
+  for(const c of CM){if(c.o(o))return c.l;}
+  return OL;
+}
 
 // ── 상태 ─────────────────────────────────────────────
-let ZR=[],ZC=[],MD=[],MM=[],CB={};
-let ZSC='',ZOC='',ZSY='',ZTC='',ZEC='',ZFC='',ZQC='',ZQF='';
-let OC=null;
+let ZR=[], ZC=[], ZSC='', ZOC='', ZSY='', ZTC='', ZEC='', ZFC='', ZQC='', ZQF='', ZHC='', ZNC='';
+let CB={}, OC=null;
+let moMonths=[], moData={};  // moData: { 'YYYY년M월': { site: {c, n, mm} } }
 
 // ── 드롭 설정 ────────────────────────────────────────
-function setupDrop(cardId,inputId,type){
-  const card=document.getElementById(cardId),input=document.getElementById(inputId);
-  card.addEventListener('dragover',e=>{e.preventDefault();card.classList.add('dragover');});
-  card.addEventListener('dragleave',()=>card.classList.remove('dragover'));
-  card.addEventListener('drop',e=>{e.preventDefault();card.classList.remove('dragover');hf(e.dataTransfer.files[0],type);});
-  input.addEventListener('change',e=>hf(e.target.files[0],type));
-}
-setupDrop('dz','fi-zd','zd'); setupDrop('dm','fi-mo','mo');
+const dz=document.getElementById('dz'), fi=document.getElementById('fi-zd');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');hf(e.dataTransfer.files[0]);});
+fi.addEventListener('change',e=>hf(e.target.files[0]));
 
-function hf(file,type){
-  if(!file)return;
+function hf(file) {
+  if(!file) return;
   const r=new FileReader();
-  r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true}); type==='zd'?pzd(wb,file.name):pmo(wb,file.name);};
+  r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true}); parseAll(wb,file.name);};
   r.readAsArrayBuffer(file);
 }
 
-// ── 젠데스크 파싱 ────────────────────────────────────
-function pzd(wb,name){
+// ── 파싱 ─────────────────────────────────────────────
+function parseAll(wb, name) {
   const ws=wb.Sheets[wb.SheetNames[0]];
-  const data=XLSX.utils.sheet_to_json(ws,{raw:false,dateNF:'yyyy-mm-dd'});
-  if(!data.length)return;
+  const data=XLSX.utils.sheet_to_json(ws,{raw:false, dateNF:'yyyy-mm-dd'});
+  if(!data.length) return;
   ZC=Object.keys(data[0]).map(c=>c.trim());
   ZR=data.map(r=>{const t={};Object.keys(r).forEach(k=>t[k.trim()]=r[k]);return t;});
-  const lbl=document.getElementById('lbl-zd');lbl.textContent=`✓ ${name} (${ZR.length}건)`;lbl.classList.remove('hidden');
-  const ws2=document.getElementById('fw');ws2.innerHTML='<option value="">전체</option>';
+
+  // 컬럼 찾기
+  ZSC=fc(['티켓 상태','상태','status'])||'';
+  ZSY=fc(['대상시스템','system','product'])||'';
+  ZOC=fc(['조직','organization','org'])||'';
+  ZTC=fc(['제목','title','subject'])||'';
+  ZEC=fc(['종료일','closed','resolved_at','solved_at'])||'';
+  ZFC=fc(['업데이트 시간','업데이트','updated','updated_at'])||'';
+  ZQC=fc(['요청일'])||'';
+  ZQF=fc(['요청 날짜','요청날짜','created','created_at'])||'';
+  ZHC=fc(['고객 소요시간','customer'])||'';   // 고객 소요시간(H)
+  ZNC=fc(['전체 소요시간','total'])||'';       // 전체 소요시간(H)
+
+  document.getElementById('lbl-zd').textContent=`✓ ${name} (${ZR.length}건)`;
+  document.getElementById('lbl-zd').classList.remove('hidden');
+
+  // 처리자 셀렉트
+  const wSel=document.getElementById('fw');
+  wSel.innerHTML='<option value="">전체</option>';
   const wc=fc(['처리자','assignee','agent']);
-  if(wc)[...new Set(ZR.map(r=>r[wc]).filter(Boolean))].sort().forEach(w=>{const o=document.createElement('option');o.value=o.textContent=w;ws2.appendChild(o);});
+  if(wc)[...new Set(ZR.map(r=>r[wc]).filter(Boolean))].sort().forEach(w=>{
+    const o=document.createElement('option');o.value=o.textContent=w;wSel.appendChild(o);
+  });
+
+  // 기본 날짜
   const today=new Date(),dow=today.getDay()===0?7:today.getDay();
   const pm=new Date(today);pm.setDate(today.getDate()-dow-6);
   document.getElementById('ws').value=tds(pm);
+
+  // 월별 데이터 미리 집계
+  buildMonthlyData();
+
   document.getElementById('result-area').classList.add('hidden');
   closeDetail();
   document.getElementById('main-area').classList.remove('hidden');
   stab2('zd');
 }
 
-function fc(cands){for(const c of cands){const f=ZC.find(col=>col.includes(c));if(f)return f;}return null;}
-function pd(val){if(!val)return null;const s=String(val).replace(/'/g,'').trim();if(!s||s==='-')return null;const d=new Date(s);return isNaN(d.getTime())?null:d;}
-function tds(d){return d.toISOString().slice(0,10);}
-function ad(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
-function gdd(row,mc,fc2){const m=pd(row[mc]);if(m)return tds(m);const f=pd(row[fc2]);return f?tds(f):'-';}
-function gee(row){const m=pd(row[ZEC]);if(m)return m;const f=pd(row[ZFC]);return f?new Date(tds(f)):null;}
+// ── 월별 데이터 빌드 ────────────────────────────────
+function buildMonthlyData() {
+  moData={};
+  const monthSet=new Set();
 
-// ── 집계 ─────────────────────────────────────────────
-function calc(){
-  const wf=document.getElementById('fw').value,ws=document.getElementById('ws').value;
+  ZR.forEach(r=>{
+    // 날짜: 종료일 없으면 업데이트시간
+    const effDate = getEffDate(r);
+    if(!effDate) return;
+
+    const y=effDate.getFullYear();
+    const m=effDate.getMonth()+1;
+    const monthKey=`${y}년${m}월`;
+    monthSet.add(monthKey);
+
+    const site = getSiteName(r[ZOC]||'', r[ZSY]||'');
+    const cust = parseH(r[ZHC]);
+    const total = parseH(r[ZNC]);
+    const mm = total>0 ? total/160 : 0;
+
+    if(!moData[monthKey]) moData[monthKey]={};
+    if(!moData[monthKey][site]) moData[monthKey][site]={c:0,n:0,m:0,cnt:0};
+    moData[monthKey][site].c += cust;
+    moData[monthKey][site].n += total;
+    moData[monthKey][site].cnt++;
+  });
+
+  // 월 정렬 (오래된 순)
+  moMonths=[...monthSet].sort((a,b)=>{
+    const pa=a.match(/(\d+)년(\d+)월/),pb=b.match(/(\d+)년(\d+)월/);
+    return (pa[1]*100+parseInt(pa[2]))-(pb[1]*100+parseInt(pb[2]));
+  });
+
+  // 월 셀렉트 갱신
+  const msel=document.getElementById('mms');
+  msel.innerHTML='<option value="">전체 (합산)</option>';
+  moMonths.forEach(m=>{const o=document.createElement('option');o.value=o.textContent=m;msel.appendChild(o);});
+  renderMonthly();
+}
+
+function parseH(val) {
+  if(!val) return 0;
+  const s=String(val).replace(/'/g,'').trim();
+  if(!s||s==='-') return 0;
+  return parseFloat(s)||0;
+}
+
+function getEffDate(row) {
+  const d=pd(row[ZEC]);
+  if(d) return d;
+  const f=pd(row[ZFC]);
+  return f||null;
+}
+
+// ── 월별 렌더링 ──────────────────────────────────────
+function renderMonthly() {
+  const sel=document.getElementById('mms').value;
+  const tf=document.getElementById('mtf').value;
+
+  // 선택된 월(들) 결정
+  const months=sel?[sel]:moMonths;
+
+  // 사이트별 집계
+  const siteData={};
+  SITE_ORDER.forEach(site=>{ siteData[site]={c:0,n:0}; });
+
+  months.forEach(mo=>{
+    const md=moData[mo]||{};
+    Object.entries(md).forEach(([site,v])=>{
+      // SITE_ORDER에 있는 사이트만
+      if(siteData[site]!==undefined){
+        siteData[site].c+=v.c;
+        siteData[site].n+=v.n;
+      } else {
+        // 공유형 계열이면 공유형으로 합산
+        if(getSysType(ZR.find(r=>getSiteName(r[ZOC]||'',r[ZSY]||'')===site)?.[ZSY]||'')==='공유형'||site==='공유형'){
+          siteData['공유형']=(siteData['공유형']||{c:0,n:0});
+          siteData['공유형'].c+=v.c; siteData['공유형'].n+=v.n;
+        }
+      }
+    });
+  });
+
+  // 시스템 유형 필터
+  let filtered = SITE_ORDER.filter(site=>{
+    if(tf && getSiteType(site)!==tf) return false;
+    return true;
+  });
+
+  // 요약 카드
+  const bt={단독형:{c:0,n:0,cnt:0},유상:{c:0,n:0,cnt:0},공유형:{c:0,n:0,cnt:0}};
+  let tC=0,tN=0;
+  filtered.forEach(site=>{
+    const v=siteData[site]||{c:0,n:0};
+    tC+=v.c; tN+=v.n;
+    const t=getSiteType(site);
+    if(bt[t]){bt[t].c+=v.c;bt[t].n+=v.n;bt[t].cnt++;}
+  });
+
+  document.getElementById('msc').innerHTML=`
+    <div class="mc"><div class="mcl">전체 고객사</div><div class="mcv">${filtered.length}</div></div>
+    <div class="mc"><div class="mcl">고객시간 합계</div><div class="mcv">${tC.toFixed(2)}H</div></div>
+    <div class="mc"><div class="mcl">내부시간 합계</div><div class="mcv">${tN.toFixed(2)}H</div></div>
+    <div class="mc"><div class="mcl">M/M 합계</div><div class="mcv">${(tN/160).toFixed(3)}</div></div>
+    <div class="mc" style="border:1px solid #7dd3fc;cursor:pointer;" onclick="ftf('단독형')">
+      <div class="mcl">${tbadge('단독형')}</div>
+      <div class="mcv">${bt['단독형'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
+      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['단독형'].c.toFixed(2)}H</div>
+    </div>
+    <div class="mc" style="border:1px solid #fcd34d;cursor:pointer;" onclick="ftf('유상')">
+      <div class="mcl">${tbadge('유상')}</div>
+      <div class="mcv">${bt['유상'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
+      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['유상'].c.toFixed(2)}H</div>
+    </div>
+    <div class="mc" style="border:1px solid #86efac;cursor:pointer;" onclick="ftf('공유형')">
+      <div class="mcl">${tbadge('공유형')}</div>
+      <div class="mcv">${bt['공유형'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
+      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['공유형'].c.toFixed(2)}H</div>
+    </div>`;
+
+  // 테이블 헤더
+  const dm = sel?[sel]:moMonths;
+  let th=`<tr><th>사이트</th><th>시스템 명칭</th>`;
+  dm.forEach(mo=>{th+=`<th class="num">${mo}<br>고객시간</th><th class="num">내부시간</th><th class="num">M/M</th>`;});
+  if(!sel&&dm.length>1) th+=`<th class="num">합계<br>고객시간</th><th class="num">내부시간</th><th class="num">M/M</th>`;
+  th+=`</tr>`;
+  document.getElementById('mth').innerHTML=th;
+
+  // 테이블 바디
+  let tb='';
+  let sumC=0,sumN=0;
+  const sumByMo={};dm.forEach(mo=>{sumByMo[mo]={c:0,n:0};});
+
+  filtered.forEach(site=>{
+    const type=getSiteType(site);
+    tb+=`<tr><td style="font-weight:500">${site}</td><td>${tbadge(type)}</td>`;
+    let rowC=0,rowN=0;
+    dm.forEach(mo=>{
+      const v=(moData[mo]||{})[site]||{c:0,n:0};
+      tb+=`<td class="num">${v.c.toFixed(2)}</td><td class="num">${v.n.toFixed(2)}</td><td class="num">${v.n>0?(v.n/160).toFixed(3):'0.000'}</td>`;
+      rowC+=v.c; rowN+=v.n;
+      sumByMo[mo].c+=v.c; sumByMo[mo].n+=v.n;
+    });
+    sumC+=rowC; sumN+=rowN;
+    if(!sel&&dm.length>1) tb+=`<td class="num" style="font-weight:500">${rowC.toFixed(2)}</td><td class="num" style="font-weight:500">${rowN.toFixed(2)}</td><td class="num" style="font-weight:500">${rowN>0?(rowN/160).toFixed(3):'0.000'}</td>`;
+    tb+=`</tr>`;
+  });
+
+  // 합계 행
+  tb+=`<tr class="sum-row"><td>합계</td><td></td>`;
+  dm.forEach(mo=>{const v=sumByMo[mo];tb+=`<td class="num">${v.c.toFixed(2)}</td><td class="num">${v.n.toFixed(2)}</td><td class="num">${v.n>0?(v.n/160).toFixed(3):'0.000'}</td>`;});
+  if(!sel&&dm.length>1) tb+=`<td class="num">${sumC.toFixed(2)}</td><td class="num">${sumN.toFixed(2)}</td><td class="num">${sumN>0?(sumN/160).toFixed(3):'0.000'}</td>`;
+  tb+=`</tr>`;
+
+  if(!filtered.length) tb='<tr><td colspan="99" style="padding:16px;text-align:center;color:var(--c3);">데이터 없음</td></tr>';
+  document.getElementById('mtb').innerHTML=tb;
+}
+
+function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;renderMonthly();}
+
+// ── 티켓 집계 ────────────────────────────────────────
+function calc() {
+  const wf=document.getElementById('fw').value, ws=document.getElementById('ws').value;
   if(!ws){toast('기준 주 시작일을 선택해주세요.');return;}
   const ps=new Date(ws),pe=ad(ps,6);
-  ZSC=fc(['티켓 상태','상태','status'])||''; ZSY=fc(['대상시스템','system','product'])||'';
-  ZOC=fc(['조직','organization','org'])||''; ZTC=fc(['제목','title','subject'])||'';
-  ZEC=fc(['종료일','closed','resolved_at','solved_at'])||''; ZFC=fc(['업데이트 시간','업데이트','updated','updated_at'])||'';
-  ZQC=fc(['요청일'])||''; ZQF=fc(['요청 날짜','요청날짜','created','created_at'])||'';
   const wc=fc(['처리자','assignee','agent']);
   let data=wf&&wc?ZR.filter(r=>r[wc]===wf):ZR;
   const ss=new Set(['해결','solved','closed']);
@@ -295,8 +526,11 @@ function calc(){
   let fb=0;
   data.forEach(r=>{
     const cl=cc(r[ZSY]||'',r[ZOC]||'');
-    if(isS(r)){const d=gee(r);if(!pd(r[ZEC])&&d)fb++;if(d&&d>=ps&&d<=pe)CB[cl].prev.push(r);}
-    else if(isR(r)){CB[cl].this.push(r);CB[cl].remain.push(r);}
+    if(isS(r)){
+      const d=gee(r);
+      if(!pd(r[ZEC])&&d)fb++;
+      if(d&&d>=ps&&d<=pe)CB[cl].prev.push(r);
+    } else if(isR(r)){CB[cl].this.push(r);CB[cl].remain.push(r);}
     else{CB[cl].remain.push(r);}
   });
   rct();
@@ -312,16 +546,16 @@ function rct(){
   let h='';
   all.forEach(l=>{
     const b=CB[l],has=b.prev.length+b.this.length+b.remain.length>0;
-    const t=CL_TYPE[l]||'-';
+    const t=CL_TYPE[l]||'단독형';
     h+=`<tr style="${has?'':'opacity:0.35;'}" onclick="ocd('${l}')" data-c="${l}">
       <td style="font-weight:500">${l}</td>
-      <td>${t!=='-'?tbadge(t):'-'}</td>
+      <td>${tbadge(t)}</td>
       <td class="num">${rc2(b.prev.length,'p')}</td>
       <td class="num">${rc2(b.this.length,'t')}</td>
       <td class="num">${rc2(b.remain.length,'r')}</td>
     </tr>`;
   });
-  h+=`<tr class="tr"><td>합계</td><td></td><td class="num">${rc2(tot.prev,'p')}</td><td class="num">${rc2(tot.this,'t')}</td><td class="num">${rc2(tot.remain,'r')}</td></tr>`;
+  h+=`<tr class="trow"><td>합계</td><td></td><td class="num">${rc2(tot.prev,'p')}</td><td class="num">${rc2(tot.this,'t')}</td><td class="num">${rc2(tot.remain,'r')}</td></tr>`;
   document.getElementById('ctb').innerHTML=h;
 }
 function rc2(n,t){if(n===0)return`<span class="cb cb0">0</span>`;const c=t==='p'?'cbp':t==='t'?'cbt':'cbr';return`<span class="cb ${c}">${n}</span>`;}
@@ -359,119 +593,18 @@ function sdb2(k,rows){
 }
 function closeDetail(){OC=null;document.getElementById('dp').classList.add('hidden');document.querySelectorAll('#ctb tr').forEach(tr=>tr.classList.remove('active'));}
 
-// ── 월별 파싱 ────────────────────────────────────────
-function pmo(wb,name){
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
-  if(!raw.length)return;
-  let mhr=-1,chr=-1;
-  for(let i=0;i<Math.min(raw.length,10);i++){if(raw[i].some(c=>/\d{4}년\s*\d+월/.test(String(c)))){mhr=i;break;}}
-  for(let i=0;i<Math.min(raw.length,10);i++){if(raw[i].some(c=>c==='사이트'||c==='조직'||c==='대상시스템')){chr=i;break;}}
-  if(chr===-1)return;
-  const months=[];
-  if(mhr>=0){let cm='';raw[mhr].forEach((cell,ci)=>{const m=String(cell).match(/(\d{4}년\s*\d+월)/);if(m)cm=m[1].replace(/\s/g,'');if(cm&&ci>=3){const sub=raw[chr][ci]||'';if(sub.includes('고객')||sub.toLowerCase().includes('customer'))months.push({l:cm,cc:ci,ic:ci+1,mc:ci+2});}});}
-  const hrow=raw[chr];
-  const ciS=hrow.findIndex(c=>c==='사이트'),ciO=hrow.findIndex(c=>c==='조직'),ciSy=hrow.findIndex(c=>c==='대상시스템');
-  const parsed=[];
-  for(let i=chr+1;i<raw.length;i++){
-    const row=raw[i];const site=String(row[ciS>=0?ciS:0]||'').trim();if(!site)continue;
-    const entry={site,org:ciO>=0?String(row[ciO]||'').trim():'',sys:ciSy>=0?String(row[ciSy]||'').trim():'',type:gtype(site),months:{}};
-    months.forEach(mo=>{
-      const c=parseFloat(String(row[mo.cc]||'0').replace(/,/g,''))||0;
-      const n=parseFloat(String(row[mo.ic]||'0').replace(/,/g,''))||0;
-      const m=parseFloat(String(row[mo.mc]||'0').replace(/,/g,''))||0;
-      entry.months[mo.l]={c,n,m};
-    });
-    parsed.push(entry);
-  }
-  if(!parsed.length)return;
-  MD=parsed;MM=months.map(m=>m.l);
-  const lbl=document.getElementById('lbl-mo');lbl.textContent=`✓ ${name} (${MD.length}개 고객사)`;lbl.classList.remove('hidden');
-  const msel=document.getElementById('mms');msel.innerHTML='<option value="">전체 (합산)</option>';
-  MM.forEach(m=>{const o=document.createElement('option');o.value=o.textContent=m;msel.appendChild(o);});
-  document.getElementById('mo-empty').classList.add('hidden');
-  document.getElementById('mo-content').classList.remove('hidden');
-  document.getElementById('main-area').classList.remove('hidden');
-  rm(); stab2('mo');
-}
+// ── 유틸 ─────────────────────────────────────────────
+function fc(cands){for(const c of cands){const f=ZC.find(col=>col.includes(c));if(f)return f;}return null;}
+function pd(val){if(!val)return null;const s=String(val).replace(/'/g,'').trim();if(!s||s==='-')return null;const d=new Date(s);return isNaN(d.getTime())?null:d;}
+function tds(d){return d.toISOString().slice(0,10);}
+function ad(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function gdd(row,mc,fc2){const m=pd(row[mc]);if(m)return tds(m);const f=pd(row[fc2]);return f?tds(f):'-';}
+function gee(row){const m=pd(row[ZEC]);if(m)return m;const f=pd(row[ZFC]);return f?new Date(tds(f)):null;}
 
-// ── 월별 렌더링 ──────────────────────────────────────
-function rm(){
-  const sel=document.getElementById('mms').value;
-  const search=document.getElementById('msearch').value.trim().toLowerCase();
-  const sort=document.getElementById('msort').value;
-  const tf=document.getElementById('mtf').value;
-
-  function gv(d){if(sel){const m=d.months[sel]||{};return{c:m.c||0,n:m.n||0,m:m.m||0};}let c=0,n=0,m=0;MM.forEach(mo=>{const v=d.months[mo]||{};c+=v.c||0;n+=v.n||0;m+=v.m||0;});return{c,n,m};}
-
-  let fd=MD.filter(d=>{
-    if(tf&&d.type!==tf)return false;
-    if(search&&!d.site.toLowerCase().includes(search)&&!d.org.toLowerCase().includes(search))return false;
-    return true;
-  });
-  fd.sort((a,b)=>{const av=gv(a),bv=gv(b);
-    if(sort==='cd')return bv.c-av.c; if(sort==='ca')return av.c-bv.c;
-    if(sort==='nd')return bv.n-av.n; if(sort==='md')return bv.m-av.m;
-    if(sort==='type')return (a.type||'').localeCompare(b.type||'','ko');
-    return a.site.localeCompare(b.site,'ko');
-  });
-
-  // 유형별 집계
-  const bt={단독형:{c:0,n:0,cnt:0},유상:{c:0,n:0,cnt:0},공유형:{c:0,n:0,cnt:0}};
-  let tC=0,tN=0,tM=0;
-  fd.forEach(d=>{const v=gv(d);tC+=v.c;tN+=v.n;tM+=v.m;const b=bt[d.type];if(b){b.c+=v.c;b.n+=v.n;b.cnt++;}});
-
-  document.getElementById('msc').innerHTML=`
-    <div class="mc"><div class="mcl">전체 고객사</div><div class="mcv">${fd.length}</div></div>
-    <div class="mc"><div class="mcl">고객 시간</div><div class="mcv">${tC.toFixed(2)}H</div></div>
-    <div class="mc"><div class="mcl">내부 시간</div><div class="mcv">${tN.toFixed(2)}H</div></div>
-    <div class="mc"><div class="mcl">M/M</div><div class="mcv">${tM.toFixed(3)}</div></div>
-    <div class="mc" style="border:1px solid #7dd3fc;cursor:pointer;" onclick="ftf('단독형')">
-      <div class="mcl">${tbadge('단독형')}</div>
-      <div class="mcv">${bt['단독형'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
-      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['단독형'].c.toFixed(2)}H</div>
-    </div>
-    <div class="mc" style="border:1px solid #fcd34d;cursor:pointer;" onclick="ftf('유상')">
-      <div class="mcl">${tbadge('유상')}</div>
-      <div class="mcv">${bt['유상'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
-      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['유상'].c.toFixed(2)}H</div>
-    </div>
-    <div class="mc" style="border:1px solid #86efac;cursor:pointer;" onclick="ftf('공유형')">
-      <div class="mcl">${tbadge('공유형')}</div>
-      <div class="mcv">${bt['공유형'].cnt}<span style="font-size:13px;font-weight:400;color:var(--cs)"> 사</span></div>
-      <div style="font-size:11px;color:var(--c3);margin-top:2px;">${bt['공유형'].c.toFixed(2)}H</div>
-    </div>`;
-
-  const dm=sel?[sel]:MM;
-  let th=`<tr><th>사이트</th><th>시스템 유형</th>`;
-  dm.forEach(mo=>{th+=`<th class="num">${mo} 고객H</th><th class="num">내부H</th><th class="num">M/M</th>`;});
-  if(!sel&&MM.length>1)th+='<th class="num">합계 고객H</th><th class="num">내부H</th><th class="num">M/M</th>';
-  th+='</tr>';
-  document.getElementById('mth').innerHTML=th;
-
-  let tb='';
-  fd.forEach(d=>{
-    tb+=`<tr><td>${d.site}</td><td>${tbadge(d.type)}</td>`;
-    dm.forEach(mo=>{const m=d.months[mo]||{};tb+=`<td class="num">${(m.c||0).toFixed(2)}</td><td class="num">${(m.n||0).toFixed(2)}</td><td class="num">${(m.m||0).toFixed(3)}</td>`;});
-    if(!sel&&MM.length>1){const v=gv(d);tb+=`<td class="num" style="font-weight:500">${v.c.toFixed(2)}</td><td class="num" style="font-weight:500">${v.n.toFixed(2)}</td><td class="num" style="font-weight:500">${v.m.toFixed(3)}</td>`;}
-    tb+='</tr>';
-  });
-  if(!fd.length)tb='<tr><td colspan="99" style="padding:16px;text-align:center;color:var(--c3);">데이터 없음</td></tr>';
-  document.getElementById('mtb').innerHTML=tb;
-  document.getElementById('mn').textContent=!sel&&MM.length>1?`* ${MM.join(', ')} 합산`:'';
-}
-
-function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;rm();}
-
-// ── 탭 전환 ─────────────────────────────────────────
 function stab(id,btn){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');}
 function stab2(id){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');document.getElementById('tab-'+id).classList.add('active');}
-
-function toast(msg){
-  let el=document.getElementById('toast');
-  if(!el){el=document.createElement('div');el.id='toast';el.style.cssText='margin:8px 0;padding:8px 12px;border-radius:4px;font-size:12px;background:var(--bgw);color:var(--cw);';document.getElementById('panel-zd').prepend(el);}
-  el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);
-}
+function toast(msg){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.style.cssText='margin:8px 0;padding:8px 12px;border-radius:4px;font-size:12px;background:var(--bgw);color:var(--cw);';document.getElementById('panel-zd').prepend(el);}el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);}
+function getSysType(sys){const s=(sys||'').trim();if(s.includes('[공유형]')||s.includes('[고우넷]')||s.includes('[고우아이티]'))return'공유형';if(s.includes('[무상]'))return'단독형';return'유상';}
 </script>
 </body>
 </html>
