@@ -61,6 +61,15 @@ button:hover{background:var(--bg2);}
 .ct tbody tr.trow{font-weight:600;background:var(--bg2);cursor:default;}
 .ct tbody td{padding:9px 14px;}
 .ct tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+/* 월별 사이트 상세 패널 */
+.mo-dp{margin-top:0;border-top:none;border:0.5px solid var(--bd3);border-top:none;border-radius:0 0 var(--rl) var(--rl);overflow:hidden;}
+.mtw table tbody tr.mo-active{background:var(--bgi)!important;outline:1px solid var(--bdi) inset;}
+.mtw table tbody tr.clickable{cursor:pointer;}
+.mtw table tbody tr.clickable:hover td{background:var(--bg2);}
+.mo-detail-wrap{overflow-x:auto;max-height:280px;overflow-y:auto;}
+.mo-detail-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bd3);}
+.mo-detail-title{font-size:12px;font-weight:500;color:var(--ct);}
+.mo-detail-close{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:var(--cs);}
 .cb{display:inline-block;min-width:28px;text-align:center;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:500;}
 .cbp{background:var(--bgg);color:var(--cg);}
 .cbt{background:var(--bgi);color:var(--ci);}
@@ -107,7 +116,25 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mtw table tbody tr.sum-row{font-weight:600;background:var(--bg2);}
 .mtw table tbody td{padding:7px 12px;white-space:nowrap;}
 .mtw table tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+/* 월별 사이트 상세 패널 */
+.mo-dp{margin-top:0;border-top:none;border:0.5px solid var(--bd3);border-top:none;border-radius:0 0 var(--rl) var(--rl);overflow:hidden;}
+.mtw table tbody tr.mo-active{background:var(--bgi)!important;outline:1px solid var(--bdi) inset;}
+.mtw table tbody tr.clickable{cursor:pointer;}
+.mtw table tbody tr.clickable:hover td{background:var(--bg2);}
+.mo-detail-wrap{overflow-x:auto;max-height:280px;overflow-y:auto;}
+.mo-detail-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bd3);}
+.mo-detail-title{font-size:12px;font-weight:500;color:var(--ct);}
+.mo-detail-close{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:var(--cs);}
 .num{text-align:right;font-variant-numeric:tabular-nums;}
+/* 월별 사이트 상세 패널 */
+.mo-dp{margin-top:0;border-top:none;border:0.5px solid var(--bd3);border-top:none;border-radius:0 0 var(--rl) var(--rl);overflow:hidden;}
+.mtw table tbody tr.mo-active{background:var(--bgi)!important;outline:1px solid var(--bdi) inset;}
+.mtw table tbody tr.clickable{cursor:pointer;}
+.mtw table tbody tr.clickable:hover td{background:var(--bg2);}
+.mo-detail-wrap{overflow-x:auto;max-height:280px;overflow-y:auto;}
+.mo-detail-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg2);border-bottom:0.5px solid var(--bd3);}
+.mo-detail-title{font-size:12px;font-weight:500;color:var(--ct);}
+.mo-detail-close{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:var(--cs);}
 </style>
 </head>
 <body>
@@ -180,7 +207,16 @@ table.dt tbody td.dc{white-space:nowrap;}
     </div>
     <div id="copy-toast" class="hidden" style="text-align:right;font-size:11px;color:var(--cg);margin-bottom:4px;">✓ 클립보드에 복사됐어요!</div>
     <div class="msc" id="msc"></div>
-    <div class="mtw"><table><thead id="mth"></thead><tbody id="mtb"></tbody></table></div>
+    <div class="mtw" id="mtw-wrap"><table><thead id="mth"></thead><tbody id="mtb"></tbody></table></div>
+    <div id="mo-dp" class="mo-dp hidden">
+      <div class="mo-detail-header">
+        <span class="mo-detail-title" id="mo-dp-title"></span>
+        <button class="mo-detail-close" onclick="closeMoDetail()">✕</button>
+      </div>
+      <div class="mo-detail-wrap">
+        <table class="dt"><thead id="mo-dp-thead"></thead><tbody id="mo-dp-tbody"></tbody></table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1206,9 +1242,23 @@ function renderMonthly() {
   let sumC=0,sumN=0;
   const sumByMo={};dm.forEach(mo=>{sumByMo[mo]={c:0,n:0};});
 
+  // 기타 사이트 집계 (SITE_ORDER에 없는 것들)
+  const otherSites = {};
+  months.forEach(mo=>{
+    const md=moData[mo]||{};
+    Object.entries(md).forEach(([site,v])=>{
+      if(!SITE_ORDER.includes(site)){
+        if(!otherSites[site]) otherSites[site]={c:0,n:0};
+        otherSites[site].c+=v.c; otherSites[site].n+=v.n;
+      }
+    });
+  });
+  const otherList=Object.entries(otherSites).filter(([,v])=>v.c>0||v.n>0);
+
   filtered.forEach(site=>{
     const type=getSiteType(site);
-    tb+=`<tr><td style="font-weight:500">${site}</td><td>${tbadge(type)}</td>`;
+    tb+=`<tr class="clickable" data-site="${site}" onclick="showMoDetail('${site}')" id="mo-row-${site.replace(/[^a-zA-Z0-9가-힣]/g,'_')}">`;
+    tb+=`<td style="font-weight:500">${site} <span style="font-size:10px;color:var(--c3)">▾</span></td><td>${tbadge(type)}</td>`;
     let rowC=0,rowN=0;
     dm.forEach(mo=>{
       const v=(moData[mo]||{})[site]||{c:0,n:0};
@@ -1221,6 +1271,28 @@ function renderMonthly() {
     tb+=`</tr>`;
   });
 
+  // 기타 사이트 행 (데이터 있을 때만)
+  if(otherList.length>0 && (!tf)){
+    let etherC=0,etherN=0;
+    otherList.forEach(([,v])=>{etherC+=v.c;etherN+=v.n;});
+    sumC+=etherC; sumN+=etherN;
+    dm.forEach(mo=>{
+      const mv=moData[mo]||{};
+      let mc=0,mn=0;
+      Object.entries(mv).forEach(([site,v])=>{if(!SITE_ORDER.includes(site)){mc+=v.c;mn+=v.n;}});
+      sumByMo[mo].c+=mc; sumByMo[mo].n+=mn;
+    });
+    tb+=`<tr class="clickable" onclick="showMoDetailOther()" id="mo-row-other">`;
+    tb+=`<td style="font-weight:500;color:var(--cs)">기타 (${otherList.length}개 사이트) <span style="font-size:10px">▾</span></td><td>-</td>`;
+    dm.forEach(mo=>{
+      const mv=moData[mo]||{};let mc=0,mn=0;
+      Object.entries(mv).forEach(([site,v])=>{if(!SITE_ORDER.includes(site)){mc+=v.c;mn+=v.n;}});
+      tb+=`<td class="num">${mc.toFixed(2)}</td><td class="num">${mn.toFixed(2)}</td><td class="num">${mn>0?(mn/160).toFixed(3):'0.000'}</td>`;
+    });
+    if(!sel&&dm.length>1) tb+=`<td class="num" style="font-weight:500">${etherC.toFixed(2)}</td><td class="num" style="font-weight:500">${etherN.toFixed(2)}</td><td class="num" style="font-weight:500">${etherN>0?(etherN/160).toFixed(3):'0.000'}</td>`;
+    tb+=`</tr>`;
+  }
+
   // 합계 행
   tb+=`<tr class="sum-row"><td>합계</td><td></td>`;
   dm.forEach(mo=>{const v=sumByMo[mo];tb+=`<td class="num">${v.c.toFixed(2)}</td><td class="num">${v.n.toFixed(2)}</td><td class="num">${v.n>0?(v.n/160).toFixed(3):'0.000'}</td>`;});
@@ -1229,6 +1301,97 @@ function renderMonthly() {
 
   if(!filtered.length) tb='<tr><td colspan="99" style="padding:16px;text-align:center;color:var(--c3);">데이터 없음</td></tr>';
   document.getElementById('mtb').innerHTML=tb;
+}
+
+// ── 월별 사이트 상세 ──────────────────────────────────
+let moDetailSite = null;
+
+function showMoDetail(site) {
+  if(moDetailSite === site){closeMoDetail();return;}
+  moDetailSite = site;
+  // 행 하이라이트
+  document.querySelectorAll('.mtw table tbody tr').forEach(tr=>tr.classList.remove('mo-active'));
+  const rowId = 'mo-row-' + site.replace(/[^a-zA-Z0-9가-힣]/g,'_');
+  const tr = document.getElementById(rowId);
+  if(tr) tr.classList.add('mo-active');
+
+  // 해당 사이트 티켓 수집 (현재 선택 월 기준)
+  const sel = document.getElementById('mms').value;
+  const rows = ZR.filter(r=>{
+    const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
+    if(rSite !== site) return false;
+    if(sel){
+      const effDate = getEffDate(r);
+      if(!effDate) return false;
+      const ym = `${effDate.getFullYear()}년${effDate.getMonth()+1}월`;
+      return ym === sel;
+    }
+    return true;
+  });
+
+  renderMoDetailTable(site + ' 티켓 목록', rows);
+}
+
+function showMoDetailOther() {
+  if(moDetailSite === '__other__'){closeMoDetail();return;}
+  moDetailSite = '__other__';
+  document.querySelectorAll('.mtw table tbody tr').forEach(tr=>tr.classList.remove('mo-active'));
+  const tr = document.getElementById('mo-row-other');
+  if(tr) tr.classList.add('mo-active');
+
+  const sel = document.getElementById('mms').value;
+  const rows = ZR.filter(r=>{
+    const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
+    if(SITE_ORDER.includes(rSite)) return false;
+    if(sel){
+      const effDate = getEffDate(r);
+      if(!effDate) return false;
+      const ym = `${effDate.getFullYear()}년${effDate.getMonth()+1}월`;
+      return ym === sel;
+    }
+    return true;
+  });
+
+  renderMoDetailTable('기타 사이트 티켓 목록', rows);
+}
+
+function renderMoDetailTable(title, rows) {
+  document.getElementById('mo-dp-title').textContent = `${title} · ${rows.length}건`;
+  document.getElementById('mo-dp-thead').innerHTML =
+    '<tr><th>사이트</th><th>제목</th><th>상태</th><th>고객H</th><th>내부H</th><th>종료일</th></tr>';
+
+  const bgMap2={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bg3)','등록':'var(--bgi)'};
+  const txMap2={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cs)','등록':'var(--ci)'};
+
+  if(!rows.length){
+    document.getElementById('mo-dp-tbody').innerHTML =
+      '<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--c3);">해당 건이 없습니다.</td></tr>';
+  } else {
+    document.getElementById('mo-dp-tbody').innerHTML = rows.map(r=>{
+      const site2 = r['사이트'] || getSiteName(r[ZOC]||'',r[ZSY]||'');
+      const st=(r[ZSC]||'').trim();
+      const bg=bgMap2[st]||'var(--bg3)',tx=txMap2[st]||'var(--cs)';
+      const cH = parseH(r[ZHC]);
+      const nH = parseH(r[ZNC]);
+      return `<tr>
+        <td style="white-space:nowrap">${site2}</td>
+        <td class="tc" style="max-width:250px;white-space:normal;word-break:break-all;line-height:1.4;">${r[ZTC]||'-'}</td>
+        <td><span class="stp" style="background:${bg};color:${tx}">${st}</span></td>
+        <td class="num">${cH.toFixed(2)}</td>
+        <td class="num">${nH.toFixed(2)}</td>
+        <td style="white-space:nowrap">${gdd(r,ZEC,ZFC)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('mo-dp').classList.remove('hidden');
+  document.getElementById('mo-dp').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeMoDetail() {
+  moDetailSite = null;
+  document.getElementById('mo-dp').classList.add('hidden');
+  document.querySelectorAll('.mtw table tbody tr').forEach(tr=>tr.classList.remove('mo-active'));
 }
 
 function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;renderMonthly();}
