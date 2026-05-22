@@ -1044,7 +1044,7 @@ function cc(sys, org) {
 }
 
 // ── 상태 ─────────────────────────────────────────────
-let ZR=[], ZC=[], ZSC='', ZOC='', ZSY='', ZTC='', ZEC='', ZFC='', ZQC='', ZQF='', ZHC='', ZNC='';
+let ZR=[], ZC=[], ZSC='', ZOC='', ZSY='', ZTC='', ZEC='', ZFC='', ZQC='', ZQF='', ZHC='', ZNC='', ZCC='', ZDC='';
 let CB={}, OC=null;
 let moMonths=[], moData={};  // moData: { 'YYYY년M월': { site: {c, n, mm} } }
 
@@ -1081,6 +1081,8 @@ function parseAll(wb, name) {
   ZQF=fc(['요청 날짜','요청날짜','created','created_at'])||'';
   ZHC=fc(['고객 소요시간','customer'])||'';   // 고객 소요시간(H)
   ZNC=fc(['전체 소요시간','total'])||'';       // 전체 소요시간(H)
+  ZCC=fc(['CSR 유형','CSR유형','csr'])||'';   // CSR 유형
+  ZDC=fc(['처리내역','처리 내역','description'])||''; // 처리내역(작업내용)
 
   document.getElementById('lbl-zd').textContent=`✓ ${name} (${ZR.length}건)`;
   document.getElementById('lbl-zd').classList.remove('hidden');
@@ -1367,28 +1369,36 @@ function showMoDetailOther() {
 function renderMoDetailTable(title, rows) {
   document.getElementById('mo-dp-title').textContent = `${title} · ${rows.length}건`;
   document.getElementById('mo-dp-thead').innerHTML =
-    '<tr><th>사이트</th><th>제목</th><th>상태</th><th>고객H</th><th>내부H</th><th>종료일</th></tr>';
+    '<tr><th>요청일자</th><th>CSR내용</th><th>요청자</th><th>처리일자</th><th>소요시간</th><th>처리자</th><th>처리상태</th><th>CSR유형</th><th>작업내용</th></tr>';
 
   const bgMap2={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bg3)','등록':'var(--bgi)'};
   const txMap2={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cs)','등록':'var(--ci)'};
 
   if(!rows.length){
     document.getElementById('mo-dp-tbody').innerHTML =
-      '<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--c3);">해당 건이 없습니다.</td></tr>';
+      '<tr><td colspan="9" style="padding:14px;text-align:center;color:var(--c3);">해당 건이 없습니다.</td></tr>';
   } else {
     document.getElementById('mo-dp-tbody').innerHTML = rows.map(r=>{
-      const site2 = r['사이트'] || getSiteName(r[ZOC]||'',r[ZSY]||'');
       const st=(r[ZSC]||'').trim();
       const bg=bgMap2[st]||'var(--bg3)',tx=txMap2[st]||'var(--cs)';
+      const reqDate = gdd(r, ZQC, ZQF);
+      const endDate = gdd(r, ZEC, ZFC);
       const cH = parseH(r[ZHC]);
-      const nH = parseH(r[ZNC]);
+      const requester = r[fc(['요청자','requester'])||'']||'-';
+      const worker = r[fc(['처리자','assignee','agent'])||'']||'-';
+      const csr = r[ZCC]||'-';
+      const content = r[ZDC]||'-';
+      const title = r[ZTC]||'-';
       return `<tr>
-        <td style="white-space:nowrap">${site2}</td>
-        <td class="tc" style="max-width:250px;white-space:normal;word-break:break-all;line-height:1.4;">${r[ZTC]||'-'}</td>
-        <td><span class="stp" style="background:${bg};color:${tx}">${st}</span></td>
+        <td style="white-space:nowrap">${reqDate}</td>
+        <td style="max-width:220px;white-space:normal;word-break:break-all;line-height:1.4;">${title}</td>
+        <td style="white-space:nowrap">${requester}</td>
+        <td style="white-space:nowrap">${endDate}</td>
         <td class="num">${cH.toFixed(2)}</td>
-        <td class="num">${nH.toFixed(2)}</td>
-        <td style="white-space:nowrap">${gdd(r,ZEC,ZFC)}</td>
+        <td style="white-space:nowrap">${worker}</td>
+        <td><span class="stp" style="background:${bg};color:${tx}">${st}</span></td>
+        <td style="white-space:nowrap">${csr}</td>
+        <td style="max-width:220px;white-space:normal;word-break:break-all;line-height:1.4;">${content}</td>
       </tr>`;
     }).join('');
   }
