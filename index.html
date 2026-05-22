@@ -214,7 +214,11 @@ table.dt tbody td.dc{white-space:nowrap;}
     <div id="mo-dp" class="mo-dp hidden">
       <div class="mo-detail-header">
         <span class="mo-detail-title" id="mo-dp-title"></span>
-        <button class="mo-detail-close" onclick="closeMoDetail()">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="mo-dp-copy-toast" class="hidden" style="font-size:11px;color:var(--cg);">✓ 복사됐어요!</span>
+          <button onclick="copyMoDetail()" style="font-size:11px;padding:3px 10px;">📋 복사</button>
+          <button class="mo-detail-close" onclick="closeMoDetail()">✕</button>
+        </div>
       </div>
       <div class="mo-detail-wrap">
         <table class="dt"><thead id="mo-dp-thead"></thead><tbody id="mo-dp-tbody"></tbody></table>
@@ -1367,12 +1371,19 @@ function showMoDetailOther() {
 }
 
 function renderMoDetailTable(title, rows) {
+  // 요청일자 오름차순 정렬
+  rows.sort((a, b) => {
+    const da = new Date(gdd(a, ZQC, ZQF).replace(/-/g,'/'));
+    const db = new Date(gdd(b, ZQC, ZQF).replace(/-/g,'/'));
+    return da - db;
+  });
   document.getElementById('mo-dp-title').textContent = `${title} · ${rows.length}건`;
   document.getElementById('mo-dp-thead').innerHTML =
     '<tr><th>요청일자</th><th>CSR내용</th><th>요청자</th><th>처리일자</th><th>소요시간</th><th>처리자</th><th>처리상태</th><th>CSR유형</th><th>작업내용</th></tr>';
 
-  const bgMap2={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bg3)','등록':'var(--bgi)'};
-  const txMap2={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cs)','등록':'var(--ci)'};
+  const statusLabel = STATUS_LABEL;
+  const bgMap2={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bgw)','등록':'var(--bgi)'};
+  const txMap2={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cw)','등록':'var(--ci)'};
 
   if(!rows.length){
     document.getElementById('mo-dp-tbody').innerHTML =
@@ -1386,7 +1397,7 @@ function renderMoDetailTable(title, rows) {
       const cH = parseH(r[ZHC]);
       const requester = r[fc(['요청자','requester'])||'']||'-';
       const worker = r[fc(['처리자','assignee','agent'])||'']||'-';
-      const csr = r[ZCC]||'-';
+      const csr = CSR_LABEL(r[ZCC]||'');
       const content = r[ZDC]||'-';
       const title = r[ZTC]||'-';
       return `<tr>
@@ -1396,7 +1407,7 @@ function renderMoDetailTable(title, rows) {
         <td style="white-space:nowrap">${endDate}</td>
         <td class="num">${cH.toFixed(2)}</td>
         <td style="white-space:nowrap">${worker}</td>
-        <td><span class="stp" style="background:${bg};color:${tx}">${st}</span></td>
+        <td><span class="stp" style="background:${bg};color:${tx}">${statusLabel(st)}</span></td>
         <td style="white-space:nowrap">${csr}</td>
         <td style="max-width:220px;white-space:normal;word-break:break-all;line-height:1.4;">${content}</td>
       </tr>`;
@@ -1411,6 +1422,35 @@ function closeMoDetail() {
   moDetailSite = null;
   document.getElementById('mo-dp').classList.add('hidden');
   document.querySelectorAll('.mtw table tbody tr').forEach(tr=>tr.classList.remove('mo-active'));
+}
+
+function copyMoDetail() {
+  const tbody = document.getElementById('mo-dp-tbody');
+  if(!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
+  const lines = [];
+  rows.forEach(tr=>{
+    const cols = tr.querySelectorAll('td');
+    if(!cols.length) return;
+    const vals = [...cols].map(td=>td.innerText.trim().replace(/\n/g,' '));
+    lines.push(vals.join('\t'));
+  });
+  if(!lines.length) return;
+  const tsv = lines.join('\n');
+  navigator.clipboard.writeText(tsv).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=tsv;ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+  }).finally(()=>{
+    const toast=document.getElementById('mo-dp-copy-toast');
+    toast.classList.remove('hidden');
+    setTimeout(()=>toast.classList.add('hidden'),2000);
+  });
+  // clipboard API는 promise 안 쓸 때도 토스트 표시
+  const toast=document.getElementById('mo-dp-copy-toast');
+  toast.classList.remove('hidden');
+  setTimeout(()=>toast.classList.add('hidden'),2000);
 }
 
 function rebuildMonthly(){
@@ -1541,8 +1581,22 @@ function rc2(n,t){if(n===0)return`<span class="cb cb0">0</span>`;const c=t==='p'
 
 // ── 상세 패널 ────────────────────────────────────────
 const BL={prev:'지난 주 완료',this:'금주 예정 (등록)',remain:'잔여 티켓'};
-const BGM={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bg3)','등록':'var(--bgi)'};
-const TXM={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cs)','등록':'var(--ci)'};
+const STATUS_LABEL = s => {
+  if(!s) return s;
+  if(s==='해결') return 'Closing-처리';
+  if(s==='등록') return 'Open';
+  if(s==='보류'||s==='대기') return 'Processing';
+  return s;
+};
+const CSR_LABEL = s => {
+  if(!s||s.trim()===''||s==='-'||s==='nan') return '기타';
+  if(s==='데이터 조정') return 'Contents 변경';
+  if(s==='추가개발') return '추가개발';
+  // 나머지는 그대로
+  return s;
+};
+const BGM={'해결':'var(--bgg)','보류':'var(--bgw)','대기':'var(--bgw)','등록':'var(--bgi)'};
+const TXM={'해결':'var(--cg)','보류':'var(--cw)','대기':'var(--cw)','등록':'var(--ci)'};
 
 function ocd(l){
   if(OC===l&&!document.getElementById('dp').classList.contains('hidden')){closeDetail();return;}
@@ -1567,7 +1621,7 @@ function sdb2(k,rows){
   if(!rows.length){document.getElementById('dtb').innerHTML='<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--c3);">해당 건이 없습니다.</td></tr>';return;}
   document.getElementById('dtb').innerHTML=rows.map(r=>{
     const st=(r[ZSC]||'').trim();const bg=BGM[st]||'var(--bg3)',tx=TXM[st]||'var(--cs)';
-    return`<tr><td class="tc">${r[ZTC]||'-'}</td><td class="dc"><span class="stp" style="background:${bg};color:${tx}">${st}</span></td><td class="dc">${gdd(r,ZEC,ZFC)}</td><td class="dc">${gdd(r,ZQC,ZQF)}</td></tr>`;
+    return`<tr><td class="tc">${r[ZTC]||'-'}</td><td class="dc"><span class="stp" style="background:${bg};color:${tx}">${STATUS_LABEL(st)}</span></td><td class="dc">${gdd(r,ZEC,ZFC)}</td><td class="dc">${gdd(r,ZQC,ZQF)}</td></tr>`;
   }).join('');
 }
 function closeDetail(){OC=null;document.getElementById('dp').classList.add('hidden');document.querySelectorAll('#ctb tr').forEach(tr=>tr.classList.remove('active'));}
