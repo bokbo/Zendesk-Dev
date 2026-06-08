@@ -246,6 +246,8 @@ table.dt tbody td.dc{white-space:nowrap;}
       <div class="fg"><label class="fl">처리자</label><select id="fw"><option value="">전체</option></select></div>
       <div class="fg"><label class="fl">기준 주 시작일 (전주 월요일)</label><input type="date" id="ws"></div>
       <button class="bp" onclick="calc()" style="padding:6px 18px;white-space:nowrap;align-self:flex-end;">집계</button>
+      <button onclick="copyTicketTable()" style="padding:6px 14px;white-space:nowrap;align-self:flex-end;font-size:12px;" id="btn-ticket-copy">📋 복사</button>
+      <span id="ticket-copy-toast" class="hidden" style="font-size:11px;color:var(--cg);align-self:flex-end;padding-bottom:8px;">✓ 복사됐어요!</span>
     </div>
     <div id="result-area" class="hidden">
       <div class="ctw">
@@ -2020,6 +2022,41 @@ function tds(d){return d.toISOString().slice(0,10);}
 function ad(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function gdd(row,mc,fc2){const m=pd(row[mc]);if(m)return tds(m);const f=pd(row[fc2]);return f?tds(f):'-';}
 function gee(row){const m=pd(row[ZEC]);if(m)return m;const f=pd(row[ZFC]);return f?new Date(tds(f)):null;}
+
+function copyTicketTable(){
+  // ctb의 tr 중 합계행(trow 클래스)과 헤더 제외, 데이터 행만
+  const rows = [...document.querySelectorAll('#ctb tr:not(.trow)')];
+  if(!rows.length){ return; }
+
+  // 각 행: 고객사명 | 지난주완료 | 금주예정 | 잔여티켓 (숫자만)
+  const lines = rows.map(tr=>{
+    const cells = tr.querySelectorAll('td');
+    if(!cells.length) return null;
+    const site = cells[0]?.innerText.trim();
+    // 카운트 배지에서 숫자만 추출
+    const getNum = td => {
+      const badge = td?.querySelector('.cb');
+      return badge ? badge.innerText.trim() : (td?.innerText.trim()||'0');
+    };
+    const prev   = getNum(cells[2]);
+    const thisW  = getNum(cells[3]);
+    const remain = getNum(cells[4]);
+    return [site, prev, thisW, remain].join('\t');
+  }).filter(Boolean);
+
+  const tsv = lines.join('\n');
+  const done = () => {
+    const t = document.getElementById('ticket-copy-toast');
+    t.classList.remove('hidden');
+    setTimeout(()=>t.classList.add('hidden'), 2000);
+  };
+  navigator.clipboard.writeText(tsv).then(done).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=tsv;
+    ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); done();
+  });
+}
 
 function stab(id,btn){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');}
 function stab2(id){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');document.getElementById('tab-'+id).classList.add('active');}
