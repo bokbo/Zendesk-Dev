@@ -1323,7 +1323,7 @@ function buildMonthlyData() {
   // 월 셀렉트 갱신
   const msel=document.getElementById('mms');
   msel.innerHTML='<option value="">전체 (합산)</option>';
-  moMonths.forEach(m=>{const o=document.createElement('option');o.value=o.textContent=m;msel.appendChild(o);});
+  [...moMonths].reverse().forEach(m=>{const o=document.createElement('option');o.value=o.textContent=m;msel.appendChild(o);});
   renderMonthly();
   buildWeeklyData();
   buildDailyData();
@@ -1930,16 +1930,16 @@ function calc() {
   let fb=0;
   const VROONG_CUTOFF = new Date('2026-06-01');
   data.forEach(r=>{
-    // 부릉: 2026-06-01 이후 티켓 제외
     const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
     const isBuroong = (r[ZSY]||'').includes('[부릉]') || (r[ZOC]||'')==='Vroong' || rSite==='부릉';
+    let cl = cc(r[ZSY]||'', r[ZOC]||'');
+    // 부릉: 2026-06-01 이후는 무상(기타)로 분류
     if(isBuroong){
       const effDate = getEffDate(r);
       const reqDate = pd(r[ZQC]||r[ZQF]||'');
       const refDate = effDate || reqDate;
-      if(refDate && refDate >= VROONG_CUTOFF) return;
+      if(refDate && refDate >= VROONG_CUTOFF) cl = OL;
     }
-    const cl=cc(r[ZSY]||'',r[ZOC]||'');
     if(isS(r)){
       const d=gee(r);
       if(!pd(r[ZEC])&&d)fb++;
