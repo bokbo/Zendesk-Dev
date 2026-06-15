@@ -277,8 +277,11 @@ table.dt tbody td.dc{white-space:nowrap;}
   <!-- 월별 처리시간 탭 -->
   <div class="tp" id="panel-mo">
     <div class="mfr">
-      <div class="fg" style="max-width:200px;"><label class="fl">월 선택</label>
-        <select id="mms" onchange="renderMonthly()"><option value="">전체 (합산)</option></select>
+      <div class="fg" style="max-width:120px;"><label class="fl">연도</label>
+        <select id="mo-year" onchange="onMonthFilterChange()"><option value="">전체</option></select>
+      </div>
+      <div class="fg" style="max-width:100px;"><label class="fl">월</label>
+        <select id="mo-month" onchange="onMonthFilterChange()"><option value="">전체</option></select>
       </div>
       <div class="fg" style="max-width:150px;"><label class="fl">시스템 유형</label>
         <select id="mtf" onchange="renderMonthly()">
@@ -1321,9 +1324,21 @@ function buildMonthlyData() {
   });
 
   // 월 셀렉트 갱신
-  const msel=document.getElementById('mms');
-  msel.innerHTML='<option value="">전체 (합산)</option>';
-  [...moMonths].reverse().forEach(m=>{const o=document.createElement('option');o.value=o.textContent=m;msel.appendChild(o);});
+  // 연도/월 셀렉트 채우기
+  const years=[...new Set(moMonths.map(m=>m.match(/(\d{4})년/)[1]))].sort((a,b)=>b-a);
+  const ySel=document.getElementById('mo-year');
+  ySel.innerHTML='<option value="">전체</option>';
+  years.forEach(y=>{const o=document.createElement('option');o.value=o.textContent=y+'년';ySel.appendChild(o);});
+  const mSel=document.getElementById('mo-month');
+  mSel.innerHTML='<option value="">전체</option>';
+  ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'].forEach(m=>{
+    const o=document.createElement('option');o.value=o.textContent=m;mSel.appendChild(o);
+  });
+  // 현재 날짜로 기본 선택
+  const now=new Date();
+  const curY=now.getFullYear()+'년', curM=(now.getMonth()+1)+'월';
+  if(years.includes(String(now.getFullYear()))) ySel.value=curY;
+  mSel.value=curM;
   renderMonthly();
   buildWeeklyData();
   buildDailyData();
@@ -1592,11 +1607,18 @@ function getEffDate(row) {
 
 // ── 월별 렌더링 ──────────────────────────────────────
 function renderMonthly() {
-  const sel=document.getElementById('mms').value;
+  // 연도+월 조합으로 sel 결정
+  const _y=document.getElementById('mo-year')?document.getElementById('mo-year').value:'';
+  const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
+  const sel = (_y&&_m) ? _y+_m : '';  // e.g. '2026년5월'
   const tf=document.getElementById('mtf').value;
 
   // 선택된 월(들) 결정
-  const months=sel?[sel]:moMonths;
+  // 연도만 선택 시 해당 연도 월 전체, 연도+월 선택 시 특정 월, 없으면 전체
+  let months;
+  if(_y && _m) months = moMonths.filter(mo=>mo===_y+_m);
+  else if(_y)  months = moMonths.filter(mo=>mo.startsWith(_y));
+  else         months = moMonths;
 
   // 사이트별 집계
   const siteData={};
@@ -1743,7 +1765,9 @@ function showMoDetail(site) {
   if(tr) tr.classList.add('mo-active');
 
   // 해당 사이트 티켓 수집 (현재 선택 월 기준)
-  const sel = document.getElementById('mms').value;
+  const _y=document.getElementById('mo-year')?document.getElementById('mo-year').value:'';
+  const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
+  const sel = (_y&&_m) ? _y+_m : '';
   const rows = ZR.filter(r=>{
     const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
     if(rSite !== site) return false;
@@ -1766,7 +1790,9 @@ function showMoDetailOther() {
   const tr = document.getElementById('mo-row-other');
   if(tr) tr.classList.add('mo-active');
 
-  const sel = document.getElementById('mms').value;
+  const _y=document.getElementById('mo-year')?document.getElementById('mo-year').value:'';
+  const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
+  const sel = (_y&&_m) ? _y+_m : '';
   const rows = ZR.filter(r=>{
     const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
     if(SITE_ORDER.includes(rSite)) return false;
@@ -1843,14 +1869,26 @@ function rebuildMonthly(){
   buildMonthlyData();
 }
 
+function onMonthFilterChange(){
+  // 연도만 선택하고 월 없으면 → 해당 연도 전체
+  // 둘 다 선택 → 특정 월
+  // 둘 다 없으면 → 전체
+  renderMonthly();
+}
+
 function ftf(t){const s=document.getElementById('mtf');s.value=s.value===t?'':t;renderMonthly();}
 
 // ── 월별 테이블 복사 (고객시간·내부시간만) ───────────
 function copyMonthlyTable() {
-  const sel = document.getElementById('mms').value;
+  const _y=document.getElementById('mo-year')?document.getElementById('mo-year').value:'';
+  const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
+  const sel = (_y&&_m) ? _y+_m : '';
   const tf  = document.getElementById('mtf').value;
-  const dm  = sel ? [sel] : moMonths;
-  const multiMonth = !sel && dm.length > 1;
+  let dm;
+  if(_y && _m) dm = moMonths.filter(mo=>mo===_y+_m);
+  else if(_y)  dm = moMonths.filter(mo=>mo.startsWith(_y));
+  else         dm = moMonths;
+  const multiMonth = dm.length > 1;
 
   // 필터된 사이트 목록
   const filtered = SITE_ORDER.filter(site => !tf || getSiteType(site) === tf);
