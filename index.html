@@ -109,6 +109,7 @@ button:hover{background:var(--bg2);}
 .ss{background:#e0f2fe;color:#0369a1;}   /* 단독형 */
 .sp2{background:#fef3c7;color:#92400e;}  /* 유상 */
 .sc{background:#f0fdf4;color:#166534;}   /* 공유형 */
+.sd{background:#f3e8ff;color:#7c3aed;}   /* 구독관리 */
 
 /* 상세 패널 */
 .dp{margin-top:1rem;border:0.5px solid var(--bd3);border-radius:var(--rl);overflow:hidden;}
@@ -285,6 +286,7 @@ table.dt tbody td.dc{white-space:nowrap;}
           <option value="단독형">단독형</option>
           <option value="유상">유상</option>
           <option value="공유형">공유형</option>
+          <option value="구독관리">구독관리</option>
         </select>
       </div>
       <div class="fg" style="max-width:160px;"><label class="fl">처리자</label>
@@ -1103,7 +1105,8 @@ function applyIdMapping(row) {
 
 function getSysType(sys) {
   const s = (sys||'').trim();
-  if (s.includes('[공유형]') || s.includes('[고우넷]') || s.includes('[고우아이티]')) return '공유형';
+  if (s.includes('[고우아이티]') || s.toLowerCase().includes('구독관리')) return '구독관리';
+  if (s.includes('[공유형]') || s.includes('[고우넷]')) return '공유형';
   if (s.includes('[무상]')) return '단독형';
   // 유상: 나머지 전부
   return '유상';
@@ -1118,6 +1121,7 @@ const SITE_ORDER = [
   '코리안리','칸테크','킨코스코리아','트루인포','파낙스홀딩스',
   '파카코리아','한일중협력사업국','화일약품','그리티','PACM자산운용',
   '공유형',
+  '구독관리',
 ];
 
 // 조직명 → 사이트 표시명 매핑
@@ -1139,7 +1143,8 @@ function getSiteName(org, sys) {
   const o = (org||'').trim();
   const s = (sys||'').trim();
   // 공유형 계열
-  if (s.includes('[공유형]') || s.includes('[고우넷]') || s.includes('[고우아이티]')) return '공유형';
+  if (s.includes('[고우아이티]') || s.toLowerCase().includes('구독관리')) return '구독관리';
+  if (s.includes('[공유형]') || s.includes('[고우넷]')) return '공유형';
   // 조직명으로 찾기
   if (o && o !== 'GowIT' && o !== 'Gownet' && ORG_TO_SITE[o]) return ORG_TO_SITE[o];
   // 대상시스템으로 찾기
@@ -1166,11 +1171,11 @@ const SITE_TYPE_MAP = {
   '인알파':'유상','일성 ISLT':'유상','정기산업':'단독형','중헌제약':'단독형',
   '코리안리':'유상','칸테크':'단독형','트루인포':'단독형',
   '파낙스홀딩스':'단독형','파카코리아':'유상','한일중협력사업국':'단독형','화일약품':'단독형',
-  '그리티':'단독형','PACM자산운용':'유상','공유형':'공유형',
+  '그리티':'단독형','PACM자산운용':'유상','공유형':'공유형','구독관리':'구독관리',
 };
 function getSiteType(site) { return SITE_TYPE_MAP[site] || '단독형'; }
 function tbadge(t) {
-  const c = t==='유상'?'sp2':t==='공유형'?'sc':'ss';
+  const c = t==='유상'?'sp2':t==='공유형'?'sc':t==='구독관리'?'sd':'ss';
   return `<span class="sb ${c}">${t}</span>`;
 }
 
@@ -1186,7 +1191,8 @@ const CM = [
   {l:'ISLT',    s:s=>s.includes('[ISLT]'),                    o:o=>o==='ISLT'},
   {l:'파카코리아',s:s=>s.includes('[파카코리아]'),               o:o=>o.includes('파카코리아')},
   {l:'PACM',    s:s=>s.includes('[PACM]'),                    o:o=>o.includes('PACM')},
-  {l:'공유형',   s:s=>s.includes('[공유형]')||s.includes('[고우넷]')||s.includes('[고우아이티]'), o:o=>o==='Gownet'},
+  {l:'공유형',   s:s=>s.includes('[공유형]')||s.includes('[고우넷]'), o:o=>o==='Gownet'},
+  {l:'구독관리',  s:s=>s.includes('[고우아이티]')||s.toLowerCase().includes('구독관리'), o:o=>false},
 
 ];
 const CLS = CM.map(c=>c.l), OL = '무상(기타)';
