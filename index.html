@@ -1082,19 +1082,27 @@ const ID_MAP={
 // ID 기준으로 사이트/조직/대상시스템 보정 (2026-04 이전 데이터)
 function applyIdMapping(row) {
   const id = parseInt(row['ID']||row[' ID']||0);
+
+  // ── 설정 시트 규칙 우선 적용 ─────────────────────────
+  const setting = id ? findSetting(id) : null;
+  if(setting) {
+    const parsed = parseSettingRule(setting.rule);
+    if(parsed.type === 'split') {
+      // 월별 분할: _split_rules에 분할 정보 저장
+      return {...row, '_split_rules': parsed.splits};
+    }
+    if(parsed.type === 'reclassify') {
+      // 사이트 재분류
+      return {...row, '사이트': parsed.site, '조직': parsed.site};
+    }
+  }
+
+  // ── 일반 ID 매핑 (2026-04 이전 데이터) ───────────────
   const m = id && ID_MAP[id] ? ID_MAP[id] : null;
   if (!m) return row;
-  
-  // 해결연월 또는 업데이트 시간이 2026-04 이전이면 매핑 적용
-  const effDateStr = row['해결연월'] || '';
-  const updStr = (row['업데이트 시간']||'').slice(0,7).replace('-','년').replace('-','월') || '';
-  
-  // 업데이트 시간 기준으로 2026-04 이전이면 매핑 적용
   const updDate = row['업데이트 시간'] ? new Date(String(row['업데이트 시간']).slice(0,10)) : null;
   const isOldData = !updDate || (updDate.getFullYear()*100 + updDate.getMonth()+1) < 202604;
-  const useMapping = isOldData;
-  
-  if (useMapping) {
+  if (isOldData) {
     return {...row, '사이트': m.s, '조직': m.o, '대상시스템': m.d};
   }
   return row;
@@ -1123,6 +1131,7 @@ const SITE_ORDER = [
   '와이제이링크','인알파','일성 ISLT','정기산업','중헌제약',
   '코리안리','칸테크','킨코스코리아','트루인포','파낙스홀딩스',
   '파카코리아','한일중협력사업국','화일약품','그리티','PACM자산운용',
+  '에스델',
   '공유형',
   '구독관리',
 ];
@@ -1137,7 +1146,7 @@ const ORG_TO_SITE = {
   '인알파코리아':'인알파','ISLT':'일성 ISLT','정기산업':'정기산업','중헌제약':'중헌제약',
   '코리안리':'코리안리','Khantech':'칸테크','킨코스코리아':'킨코스코리아',
   'Trueinfo':'트루인포','파낙스홀딩스':'파낙스홀딩스','파카코리아':'파카코리아',
-  '한중일협력사무국':'한일중협력사업국','화일약품':'화일약품','Gritee':'그리티',
+  '한중일협력사무국':'한일중협력사업국','화일약품':'화일약품','Gritee':'그리티','에스델':'에스델',
   'PACM자산운용':'PACM자산운용','Parataxis':'스탠다임',
 };
 
@@ -1174,7 +1183,7 @@ const SITE_TYPE_MAP = {
   '인알파':'유상','일성 ISLT':'유상','정기산업':'단독형','중헌제약':'단독형',
   '코리안리':'유상','칸테크':'단독형','트루인포':'단독형',
   '파낙스홀딩스':'단독형','파카코리아':'유상','한일중협력사업국':'단독형','화일약품':'단독형',
-  '그리티':'단독형','PACM자산운용':'유상','공유형':'공유형','구독관리':'구독관리',
+  '그리티':'단독형','PACM자산운용':'유상','에스델':'단독형','공유형':'공유형','구독관리':'구독관리',
 };
 function getSiteType(site) { return SITE_TYPE_MAP[site] || '단독형'; }
 function tbadge(t) {
@@ -1232,7 +1241,65 @@ function hf(file) {
 }
 
 // ── 파싱 ─────────────────────────────────────────────
+// 설정 규칙 저장소
+let SETTINGS = []; // [{id, rule, raw}]
+
+function parseSettings(wb) {
+  // '설정' 시트 찾기
+  const settingSheet = wb.SheetNames.find(n => n.includes('설정') || n.toLowerCase()==='settings');
+  if(!settingSheet) return;
+  const ws = wb.Sheets[settingSheet];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''});
+  if(rows.length < 2) return;
+  // 헤더 제외, 데이터 행 파싱
+  SETTINGS = [];
+  for(let i=1; i<rows.length; i++){
+    const row = rows[i];
+    const id = parseInt(String(row[0]||'').trim()) || null;
+    const desc = String(row[1]||'').trim();
+    const rule = String(row[2]||'').trim();
+    if(!id && !desc) continue;
+    SETTINGS.push({id, desc, rule});
+  }
+  console.log('설정 로드:', SETTINGS.length, '건', SETTINGS);
+}
+
+// 설정 규칙 파싱 - 수정내용 텍스트 해석
+function parseSettingRule(rule) {
+  if(!rule) return {type:'unknown'};
+
+  // 월별 분할: "N월 M시간" 패턴 (예: "2월 20시간, 3월 10시간, 4월 10시간")
+  const splitRe = /(\d{1,2})월\s*(\d+(?:\.\d+)?)\s*시간/g;
+  const splits = [];
+  let m;
+  while((m = splitRe.exec(rule)) !== null){
+    splits.push({month: parseInt(m[1]), hours: parseFloat(m[2])});
+  }
+  if(splits.length > 0) return {type:'split', splits};
+
+  // 사이트 재분류: "XXX 고객사로 포함" / "XXX로 포함" / "XXX 고객사걸로 포함"
+  // 조직명이 앞에 오는 패턴들
+  const reclassRe = /^(\S+)\s*(?:고객사|고객사로|로|걸로|에)\s*(?:포함|분류)/;
+  const rm = rule.match(reclassRe);
+  if(rm) return {type:'reclassify', site: rm[1]};
+
+  // "XXX 고객사" 단독 패턴
+  const simpleRe = /^(.+?)\s*고객사/;
+  const sm = rule.match(simpleRe);
+  if(sm) return {type:'reclassify', site: sm[1].trim()};
+
+  return {type:'unknown', rule};
+}
+
+// ID로 설정 규칙 찾기
+function findSetting(id) {
+  return SETTINGS.find(s => s.id === id) || null;
+}
+
 function parseAll(wb, name) {
+  // 설정 시트 먼저 파싱
+  parseSettings(wb);
+
   const ws=wb.Sheets[wb.SheetNames[0]];
   const data=XLSX.utils.sheet_to_json(ws,{raw:false, dateNF:'yyyy-mm-dd'});
   if(!data.length) return;
@@ -1305,10 +1372,25 @@ function buildMonthlyData() {
     const monthKey=`${y}년${m}월`;
     monthSet.add(monthKey);
 
-    const site = getSiteName(r[ZOC]||'', r[ZSY]||'');
+    // 사이트: applyIdMapping에서 '사이트' 필드가 있으면 우선 사용
+    const site = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
     const cust = parseH(r[ZHC]);
     const total = parseH(r[ZNC]);
-    const mm = total>0 ? total/160 : 0;
+
+    // 설정 시트 월별 분할 규칙 적용
+    if (r['_split_rules'] && r['_split_rules'].length > 0) {
+      const year = effDate.getFullYear(); // 티켓 날짜의 연도 기준
+      r['_split_rules'].forEach(sp=>{
+        const ym = `${year}년${sp.month}월`;
+        if(!moData[ym]) moData[ym]={};
+        if(!moData[ym][site]) moData[ym][site]={c:0,n:0,m:0,cnt:0};
+        moData[ym][site].c += sp.hours;
+        moData[ym][site].n += sp.hours;
+        moData[ym][site].cnt++;
+        monthSet.add(ym);
+      });
+      return; // 원본 행 건너뜀
+    }
 
     if(!moData[monthKey]) moData[monthKey]={};
     if(!moData[monthKey][site]) moData[monthKey][site]={c:0,n:0,m:0,cnt:0};
