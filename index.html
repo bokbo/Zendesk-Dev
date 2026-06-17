@@ -61,6 +61,27 @@ button:hover{background:var(--bg2);}
 .ct tbody tr.trow{font-weight:600;background:var(--bg2);cursor:default;}
 .ct tbody td{padding:9px 14px;}
 .ct tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+
+/* 주 선택 달력 */
+.week-picker-wrap{position:relative;display:inline-block;width:100%;}
+.week-picker-input{border:1px solid var(--bd2);border-radius:var(--rm);padding:6px 8px;font-size:13px;background:#fff;color:var(--ct);width:100%;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;}
+@media (prefers-color-scheme:dark){.week-picker-input{background:#2d2d2d;color:#fff;border-color:#484848;}}
+.week-picker-dropdown{position:absolute;top:calc(100% + 4px);left:0;z-index:100;background:#fff;border:1px solid var(--bd2);border-radius:var(--rl);box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:280px;padding:12px;}
+@media (prefers-color-scheme:dark){.week-picker-dropdown{background:#2d2d2d;border-color:#484848;}}
+.wp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.wp-title{font-size:13px;font-weight:600;color:var(--ct);}
+.wp-nav{background:none;border:1px solid var(--bd2);border-radius:var(--rm);padding:2px 8px;cursor:pointer;font-size:13px;color:var(--ct);}
+.wp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.wp-dow{text-align:center;font-size:10px;color:var(--cs);padding:3px 0;font-weight:500;}
+.wp-day{text-align:center;font-size:12px;padding:5px 2px;border-radius:3px;cursor:pointer;transition:background 0.1s;}
+.wp-day:hover{background:var(--bg3);}
+.wp-day.other-month{opacity:0.3;}
+.wp-day.in-week{background:var(--bgi);color:var(--ci);}
+.wp-day.week-start{border-radius:99px 0 0 99px;background:#6264a7;color:#fff!important;}
+.wp-day.week-end{border-radius:0 99px 99px 0;background:#6264a7;color:#fff!important;}
+.wp-day.in-week.other-month{opacity:0.5;}
+.wp-clear{margin-top:8px;text-align:right;}
+.wp-clear button{font-size:11px;padding:3px 10px;color:var(--cs);}
 /* 주별/일별 탭 */
 .wk-filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem;}
 .wk-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;}
@@ -145,6 +166,27 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mtw table tbody tr.sum-row{font-weight:600;background:var(--bg2);}
 .mtw table tbody td{padding:7px 12px;white-space:nowrap;}
 .mtw table tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+
+/* 주 선택 달력 */
+.week-picker-wrap{position:relative;display:inline-block;width:100%;}
+.week-picker-input{border:1px solid var(--bd2);border-radius:var(--rm);padding:6px 8px;font-size:13px;background:#fff;color:var(--ct);width:100%;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;}
+@media (prefers-color-scheme:dark){.week-picker-input{background:#2d2d2d;color:#fff;border-color:#484848;}}
+.week-picker-dropdown{position:absolute;top:calc(100% + 4px);left:0;z-index:100;background:#fff;border:1px solid var(--bd2);border-radius:var(--rl);box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:280px;padding:12px;}
+@media (prefers-color-scheme:dark){.week-picker-dropdown{background:#2d2d2d;border-color:#484848;}}
+.wp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.wp-title{font-size:13px;font-weight:600;color:var(--ct);}
+.wp-nav{background:none;border:1px solid var(--bd2);border-radius:var(--rm);padding:2px 8px;cursor:pointer;font-size:13px;color:var(--ct);}
+.wp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.wp-dow{text-align:center;font-size:10px;color:var(--cs);padding:3px 0;font-weight:500;}
+.wp-day{text-align:center;font-size:12px;padding:5px 2px;border-radius:3px;cursor:pointer;transition:background 0.1s;}
+.wp-day:hover{background:var(--bg3);}
+.wp-day.other-month{opacity:0.3;}
+.wp-day.in-week{background:var(--bgi);color:var(--ci);}
+.wp-day.week-start{border-radius:99px 0 0 99px;background:#6264a7;color:#fff!important;}
+.wp-day.week-end{border-radius:0 99px 99px 0;background:#6264a7;color:#fff!important;}
+.wp-day.in-week.other-month{opacity:0.5;}
+.wp-clear{margin-top:8px;text-align:right;}
+.wp-clear button{font-size:11px;padding:3px 10px;color:var(--cs);}
 /* 주별/일별 탭 */
 .wk-filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem;}
 .wk-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;}
@@ -183,6 +225,27 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mo-detail-title{font-size:12px;font-weight:500;color:var(--ct);}
 .mo-detail-close{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:var(--cs);}
 .num{text-align:right;font-variant-numeric:tabular-nums;}
+
+/* 주 선택 달력 */
+.week-picker-wrap{position:relative;display:inline-block;width:100%;}
+.week-picker-input{border:1px solid var(--bd2);border-radius:var(--rm);padding:6px 8px;font-size:13px;background:#fff;color:var(--ct);width:100%;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;}
+@media (prefers-color-scheme:dark){.week-picker-input{background:#2d2d2d;color:#fff;border-color:#484848;}}
+.week-picker-dropdown{position:absolute;top:calc(100% + 4px);left:0;z-index:100;background:#fff;border:1px solid var(--bd2);border-radius:var(--rl);box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:280px;padding:12px;}
+@media (prefers-color-scheme:dark){.week-picker-dropdown{background:#2d2d2d;border-color:#484848;}}
+.wp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.wp-title{font-size:13px;font-weight:600;color:var(--ct);}
+.wp-nav{background:none;border:1px solid var(--bd2);border-radius:var(--rm);padding:2px 8px;cursor:pointer;font-size:13px;color:var(--ct);}
+.wp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.wp-dow{text-align:center;font-size:10px;color:var(--cs);padding:3px 0;font-weight:500;}
+.wp-day{text-align:center;font-size:12px;padding:5px 2px;border-radius:3px;cursor:pointer;transition:background 0.1s;}
+.wp-day:hover{background:var(--bg3);}
+.wp-day.other-month{opacity:0.3;}
+.wp-day.in-week{background:var(--bgi);color:var(--ci);}
+.wp-day.week-start{border-radius:99px 0 0 99px;background:#6264a7;color:#fff!important;}
+.wp-day.week-end{border-radius:0 99px 99px 0;background:#6264a7;color:#fff!important;}
+.wp-day.in-week.other-month{opacity:0.5;}
+.wp-clear{margin-top:8px;text-align:right;}
+.wp-clear button{font-size:11px;padding:3px 10px;color:var(--cs);}
 /* 주별/일별 탭 */
 .wk-filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem;}
 .wk-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;}
@@ -322,8 +385,34 @@ table.dt tbody td.dc{white-space:nowrap;}
   <!-- 주별 처리시간 탭 -->
   <div class="tp" id="panel-wk">
     <div class="wk-filter-row">
-      <div class="fg" style="max-width:220px;"><label class="fl">주차 선택</label>
-        <select id="wk-sel" onchange="renderWeekly()"><option value="">전체 (합산)</option></select>
+      <div class="fg" style="max-width:220px;">
+        <label class="fl">주 선택</label>
+        <div class="week-picker-wrap" id="wp-wrap">
+          <button class="week-picker-input" onclick="toggleWeekPicker(event)" type="button" id="wp-input">
+            <span id="wp-label">전체</span>
+            <span style="font-size:10px;opacity:0.6;">▾</span>
+          </button>
+          <div class="week-picker-dropdown hidden" id="wp-dropdown">
+            <div class="wp-header">
+              <button class="wp-nav" onclick="wpMove(-1)">◀</button>
+              <span class="wp-title" id="wp-title"></span>
+              <button class="wp-nav" onclick="wpMove(1)">▶</button>
+            </div>
+            <div class="wp-grid" id="wp-grid"></div>
+            <div class="wp-clear">
+              <button onclick="clearWeekPicker()">전체 보기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fg" style="max-width:150px;"><label class="fl">시스템 유형</label>
+        <select id="wk-tf" onchange="renderWeekly()">
+          <option value="">전체</option>
+          <option value="단독형">단독형</option>
+          <option value="유상">유상</option>
+          <option value="공유형">공유형</option>
+          <option value="구독관리">구독관리</option>
+        </select>
       </div>
       <div class="fg" style="max-width:160px;"><label class="fl">처리자</label>
         <select id="wk-fw" onchange="rebuildWeekly()"><option value="">전체</option></select>
@@ -1088,8 +1177,15 @@ function applyIdMapping(row) {
   if(setting) {
     const parsed = parseSettingRule(setting.rule);
     if(parsed.type === 'split') {
-      // 월별 분할: _split_rules에 분할 정보 저장
+      // 월별 시간 지정 분할
       return {...row, '_split_rules': parsed.splits};
+    }
+    if(parsed.type === 'split_days') {
+      return {...row, '_split_days': {month: parsed.month, days: parsed.days}};
+    }
+    if(parsed.type === 'split_weekdays') {
+      // 요청일부터 평일 N일로 균등 분할
+      return {...row, '_split_weekdays': parsed.days};
     }
     if(parsed.type === 'reclassify') {
       // 사이트 재분류
@@ -1268,7 +1364,28 @@ function parseSettings(wb) {
 function parseSettingRule(rule) {
   if(!rule) return {type:'unknown'};
 
-  // 월별 분할: "N월 M시간" 패턴 (예: "2월 20시간, 3월 10시간, 4월 10시간")
+  // ── 패턴 0: 요청일부터 평일 N일로 균등 분할 ─────────────
+  // 예: "평일 3일로 나누기" / "평일 5일 균등" / "3 평일로 분할"
+  const weekdayRe = /(?:평일\s*(\d+)|(\d+)\s*평일)\s*(?:일\s*)?(?:로|으로|동안|에\s*걸쳐)?\s*(?:나누기|분할|균등)/;
+  const wdm = rule.match(weekdayRe);
+  if(wdm) {
+    const days = parseInt(wdm[1]||wdm[2]);
+    if(days > 0) return {type:'split_weekdays', days};
+  }
+
+  // ── 패턴 1: 특정 날짜들로 균등 분할 ───────────────────
+  // 예: "6월 8,9,10,11,15일로 시간 동일하게 나누기"
+  // 예: "6월 8,9,10일 균등 분할"
+  const dayEqualRe = /(\d{1,2})월\s*([\d,\s]+)일/;
+  const dem = rule.match(dayEqualRe);
+  if(dem && (rule.includes('나누기') || rule.includes('균등') || rule.includes('동일'))) {
+    const month = parseInt(dem[1]);
+    const days = dem[2].split(',').map(d=>parseInt(d.trim())).filter(d=>!isNaN(d)&&d>0);
+    if(days.length > 0) return {type:'split_days', month, days};
+  }
+
+  // ── 패턴 2: 월별 시간 지정 분할 ────────────────────────
+  // 예: "2월 20시간, 3월 10시간, 4월 10시간"
   const splitRe = /(\d{1,2})월\s*(\d+(?:\.\d+)?)\s*시간/g;
   const splits = [];
   let m;
@@ -1277,13 +1394,12 @@ function parseSettingRule(rule) {
   }
   if(splits.length > 0) return {type:'split', splits};
 
-  // 사이트 재분류: "XXX 고객사로 포함" / "XXX로 포함" / "XXX 고객사걸로 포함"
-  // 조직명이 앞에 오는 패턴들
+  // ── 패턴 3: 사이트 재분류 ──────────────────────────────
+  // 예: "보고펀드 고객사로 포함"
   const reclassRe = /^(\S+)\s*(?:고객사|고객사로|로|걸로|에)\s*(?:포함|분류)/;
   const rm = rule.match(reclassRe);
   if(rm) return {type:'reclassify', site: rm[1]};
 
-  // "XXX 고객사" 단독 패턴
   const simpleRe = /^(.+?)\s*고객사/;
   const sm = rule.match(simpleRe);
   if(sm) return {type:'reclassify', site: sm[1].trim()};
@@ -1363,23 +1479,23 @@ function buildMonthlyData() {
   ZR.forEach(r=>{
     // 처리자 필터
     if(mwf && wc2 && r[wc2] !== mwf) return;
-    // 날짜: 종료일 없으면 업데이트시간
-    const effDate = getEffDate(r);
-    if(!effDate) return;
-    
-    // 2026-04 이후 데이터만 월별 집계에 포함
-    const y=effDate.getFullYear(), m=effDate.getMonth()+1;
+    // 시간 없으면 제외 (상태 무관, 시간 기록된 것만)
+    const cust = parseH(r[ZHC]);
+    const total = parseH(r[ZNC]);
+    if(cust === 0 && total === 0) return;
+    // 날짜 기준: 요청 날짜 (없으면 업데이트시간)
+    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
+    if(!reqDate) return;
+    const y=reqDate.getFullYear(), m=reqDate.getMonth()+1;
     const monthKey=`${y}년${m}월`;
     monthSet.add(monthKey);
 
     // 사이트: applyIdMapping에서 '사이트' 필드가 있으면 우선 사용
     const site = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
-    const cust = parseH(r[ZHC]);
-    const total = parseH(r[ZNC]);
 
     // 설정 시트 월별 분할 규칙 적용
     if (r['_split_rules'] && r['_split_rules'].length > 0) {
-      const year = effDate.getFullYear(); // 티켓 날짜의 연도 기준
+      const year = reqDate.getFullYear();
       r['_split_rules'].forEach(sp=>{
         const ym = `${year}년${sp.month}월`;
         if(!moData[ym]) moData[ym]={};
@@ -1389,7 +1505,60 @@ function buildMonthlyData() {
         moData[ym][site].cnt++;
         monthSet.add(ym);
       });
-      return; // 원본 행 건너뜀
+      return;
+    }
+
+    // 요청일부터 평일 N일로 균등 분할
+    if (r['_split_weekdays']) {
+      const n = r['_split_weekdays'];
+      const totalH = cust || total;
+      const perDay = totalH / n;
+      // 요청일부터 평일만 카운트해서 날짜 수집
+      const dates = [];
+      const cur = new Date(reqDate);
+      while(dates.length < n) {
+        const dow = cur.getDay();
+        if(dow !== 0 && dow !== 6) dates.push(new Date(cur)); // 월~금
+        cur.setDate(cur.getDate()+1);
+      }
+      dates.forEach(d=>{
+        const y2=d.getFullYear(), mo2=d.getMonth()+1;
+        const ym2=`${y2}년${mo2}월`;
+        const dk=tds(d);
+        if(!moData[ym2]) moData[ym2]={};
+        if(!moData[ym2][site]) moData[ym2][site]={c:0,n:0,m:0,cnt:0};
+        moData[ym2][site].c+=perDay; moData[ym2][site].n+=perDay; moData[ym2][site].cnt++;
+        monthSet.add(ym2);
+        if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
+        dayData[dk].c+=perDay; dayData[dk].n+=perDay;
+        dayData[dk].rows.push({...r,'_virtual_day':dk,'_perday_h':perDay});
+      });
+      return;
+    }
+
+    // 특정 날짜들로 균등 분할
+    if (r['_split_days']) {
+      const sd = r['_split_days'];
+      const year = reqDate.getFullYear();
+      const totalH = cust || total;
+      const perDay = totalH / sd.days.length;
+      const ym = `${year}년${sd.month}월`;
+      // 월별 집계에는 합산
+      if(!moData[ym]) moData[ym]={};
+      if(!moData[ym][site]) moData[ym][site]={c:0,n:0,m:0,cnt:0};
+      moData[ym][site].c += totalH;
+      moData[ym][site].n += totalH;
+      moData[ym][site].cnt++;
+      monthSet.add(ym);
+      // 일별 집계에는 날짜별로 분산
+      sd.days.forEach(day=>{
+        const dk = `${year}-${String(sd.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
+        dayData[dk].c += perDay;
+        dayData[dk].n += perDay;
+        dayData[dk].rows.push({...r, '_virtual_day': dk, '_perday_h': perDay});
+      });
+      return;
     }
 
     if(!moData[monthKey]) moData[monthKey]={};
@@ -1433,12 +1602,12 @@ function getWeekKey(date) {
   const d=new Date(date); d.setHours(0,0,0,0);
   const day=d.getDay()===0?7:d.getDay();
   const mon=new Date(d); mon.setDate(d.getDate()-day+1);
-  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
   const fmt=dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
   const jan4=new Date(d.getFullYear(),0,4);
   const sow=new Date(jan4); sow.setDate(jan4.getDate()-(jan4.getDay()===0?6:jan4.getDay()-1));
   const weekNum=Math.floor((d-sow)/(7*86400000))+1;
-  return {key:`${d.getFullYear()}년 ${weekNum}주차 (${fmt(mon)}~${fmt(fri)})`, mon};
+  return {key:`${d.getFullYear()}년 ${weekNum}주차 (${fmt(mon)}~${fmt(sun)})`, mon};
 }
 
 function buildWeeklyData() {
@@ -1447,10 +1616,14 @@ function buildWeeklyData() {
   const wc2=fc(['처리자','assignee','agent']);
   ZR.forEach(r=>{
     if(wkf&&wc2&&r[wc2]!==wkf) return;
-    const effDate=getEffDate(r); if(!effDate) return;
-    const {key}=getWeekKey(effDate);
-    const site=r['사이트']||getSiteName(r[ZOC]||'',r[ZSY]||'');
+    // 시간 없으면 제외
     const c=parseH(r[ZHC]), n=parseH(r[ZNC]);
+    if(c===0 && n===0) return;
+    // 요청 날짜 기준
+    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
+    if(!reqDate) return;
+    const {key}=getWeekKey(reqDate);
+    const site=r['사이트']||getSiteName(r[ZOC]||'',r[ZSY]||'');
     if(!wkData[key]) wkData[key]={};
     if(!wkData[key][site]) wkData[key][site]={c:0,n:0,rows:[]};
     wkData[key][site].c+=c; wkData[key][site].n+=n; wkData[key][site].rows.push(r);
@@ -1461,15 +1634,145 @@ function buildWeeklyData() {
     const wb=parseInt((b.match(/(\d+)주차/)||['','0'])[1]);
     return ya!==yb?ya-yb:wa-wb;
   });
-  const sel=document.getElementById('wk-sel');
-  if(sel){sel.innerHTML='<option value="">전체 (합산)</option>';wkWeeks.forEach(w=>{const o=document.createElement('option');o.value=o.textContent=w;sel.appendChild(o);});}
+  // 오늘 날짜의 주를 자동 선택
+  selectTodayWeek();
   renderWeekly();
 }
-function rebuildWeekly(){wkData={};buildWeeklyData();}
+function selectTodayWeek() {
+  const todayKey = getWeekKey(new Date()).key;
+  // 데이터 있는 주 중 가장 가까운 주 찾기 (오늘 주 우선, 없으면 가장 최근 주)
+  const target = wkWeeks.includes(todayKey) ? todayKey : (wkWeeks.length ? wkWeeks[wkWeeks.length-1] : todayKey);
+  wpSelectedWeekKey = target;
+  const wm = target.match(/(\d+)주차/);
+  const dm2 = target.match(/\((\d{4}-\d{2}-\d{2})~(\d{4}-\d{2}-\d{2})\)/);
+  const wNum = wm ? wm[1]+'주차' : target;
+  const range = dm2 ? ` (${dm2[1].slice(5)}~${dm2[2].slice(5)})` : '';
+  const lbl = document.getElementById('wp-label');
+  if(lbl) lbl.textContent = wNum + range;
+  // 달력도 해당 주 월로 이동
+  if(dm2) {
+    const mon = new Date(dm2[1]);
+    wpYear = mon.getFullYear();
+    wpMonth = mon.getMonth();
+  }
+}
+
+function rebuildWeekly(){
+  wkData={};
+  buildWeeklyData();
+}
+
+// ── 주 선택 datepicker ──────────────────────────────
+let wpYear = new Date().getFullYear();
+let wpMonth = new Date().getMonth();
+let wpSelectedWeekKey = ''; // 선택된 wkWeeks 키
+
+function toggleWeekPicker(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('wp-dropdown');
+  const isHidden = dd.classList.contains('hidden');
+  dd.classList.toggle('hidden');
+  if(isHidden) renderWeekPickerCalendar();
+}
+// 달력 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('wp-wrap');
+  if(wrap && !wrap.contains(e.target)) {
+    document.getElementById('wp-dropdown')?.classList.add('hidden');
+  }
+});
+
+function wpMove(dir) {
+  wpMonth += dir;
+  if(wpMonth > 11) { wpMonth = 0; wpYear++; }
+  else if(wpMonth < 0) { wpMonth = 11; wpYear--; }
+  renderWeekPickerCalendar();
+}
+
+function renderWeekPickerCalendar() {
+  document.getElementById('wp-title').textContent = `${wpYear}년 ${wpMonth+1}월`;
+  const dows = ['월','화','수','목','금','토','일'];
+  let g = dows.map(d=>`<div class="wp-dow">${d}</div>`).join('');
+  const first = new Date(wpYear, wpMonth, 1);
+  const startDow = first.getDay()===0 ? 6 : first.getDay()-1;
+  const dim = new Date(wpYear, wpMonth+1, 0).getDate();
+
+  // 선택된 주의 월~금 범위
+  let selMon = null, selSun = null;
+  if(wpSelectedWeekKey) {
+    const m = wpSelectedWeekKey.match(/\((\d{4}-\d{2}-\d{2})~(\d{4}-\d{2}-\d{2})\)/);
+    if(m) {
+      selMon = new Date(m[1]);
+      selSun = new Date(m[2]);
+    }
+  }
+
+  // 이전 달 빈칸
+  const prevDim = new Date(wpYear, wpMonth, 0).getDate();
+  for(let i=0; i<startDow; i++) {
+    const d = prevDim - startDow + i + 1;
+    const date = new Date(wpYear, wpMonth-1, d);
+    g += makeWpDay(d, date, true, selMon, selSun);
+  }
+  for(let d=1; d<=dim; d++) {
+    const date = new Date(wpYear, wpMonth, d);
+    g += makeWpDay(d, date, false, selMon, selSun);
+  }
+  // 다음 달 빈칸
+  const total = startDow + dim;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let d=1; d<=remain; d++) {
+    const date = new Date(wpYear, wpMonth+1, d);
+    g += makeWpDay(d, date, true, selMon, selSun);
+  }
+  document.getElementById('wp-grid').innerHTML = g;
+}
+
+function makeWpDay(d, date, otherMonth, selMon, selSun) {
+  let cls = 'wp-day' + (otherMonth?' other-month':'');
+  if(selMon && selSun && date >= selMon && date <= selSun) {
+    if(date.getTime() === selMon.getTime()) cls += ' week-start';
+    else if(date.getTime() === selSun.getTime()) cls += ' week-end';
+    else cls += ' in-week';
+  }
+  const dateStr = tds(date);
+  return `<div class="${cls}" onclick="selectWeekByDate('${dateStr}')">${d}</div>`;
+}
+
+function selectWeekByDate(dateStr) {
+  const date = new Date(dateStr);
+  const {key} = getWeekKey(date);
+  // wkWeeks에 있는 키인지 확인
+  if(wkWeeks.includes(key)) {
+    wpSelectedWeekKey = key;
+  } else {
+    // 데이터 없는 주 선택 시 가장 가까운 주 찾기
+    wpSelectedWeekKey = key; // 그냥 설정 (빈 결과 표시)
+  }
+  // 레이블 업데이트
+  const m = key.match(/(\d+)주차/);
+  const wNum = m ? m[1]+'주차' : key;
+  const dm = key.match(/\((\d{4}-\d{2}-\d{2})~(\d{4}-\d{2}-\d{2})\)/);
+  const range = dm ? ` (${dm[1].slice(5)}~${dm[2].slice(5)})` : '';
+  document.getElementById('wp-label').textContent = wNum + range;
+  document.getElementById('wp-dropdown').classList.add('hidden');
+  renderWeekPickerCalendar();
+  renderWeekly();
+}
+
+function clearWeekPicker() {
+  wpSelectedWeekKey = '';
+  document.getElementById('wp-label').textContent = '전체';
+  document.getElementById('wp-dropdown').classList.add('hidden');
+  renderWeekly();
+}
 
 function renderWeekly(){
-  const sel=document.getElementById('wk-sel').value;
-  const weeks=sel?[sel]:wkWeeks;
+  const _wy=document.getElementById('wk-year')?document.getElementById('wk-year').value:'';
+  const _wm=document.getElementById('wk-month')?document.getElementById('wk-month').value:'';
+  const tf=document.getElementById('wk-tf')?document.getElementById('wk-tf').value:'';
+  // 주 datepicker 선택값 기준
+  const weeks = wpSelectedWeekKey ? [wpSelectedWeekKey] : wkWeeks;
   const sd={};
   SITE_ORDER.forEach(s=>{sd[s]={c:0,n:0,rows:[]};});
   const other={c:0,n:0,rows:[]};
@@ -1489,7 +1792,7 @@ function renderWeekly(){
     <div class="wk-card"><div class="wk-card-label">M/M</div><div class="wk-card-value">${(tN/160).toFixed(3)}</div></div>`;
   document.getElementById('wk-thead').innerHTML='<tr><th>사이트</th><th>시스템 유형</th><th class="num">고객시간</th><th class="num">내부시간</th><th class="num">M/M</th><th class="num">건수</th></tr>';
   let tb='',sumC=0,sumN=0;
-  SITE_ORDER.forEach(site=>{
+  SITE_ORDER.filter(site=>!tf||getSiteType(site)===tf).forEach(site=>{
     const v=sd[site]; const has=v.rows.length>0;
     sumC+=v.c;sumN+=v.n;
     const safe=site.replace(/'/g,"\\'");
@@ -1550,9 +1853,13 @@ function buildDailyData(){
   const wc2=fc(['처리자','assignee','agent']);
   ZR.forEach(r=>{
     if(wf&&wc2&&r[wc2]!==wf) return;
-    const effDate=getEffDate(r); if(!effDate) return;
-    const dk=tds(effDate);
+    // 시간 없으면 제외
     const c=parseH(r[ZHC]),n=parseH(r[ZNC]);
+    if(c===0 && n===0) return;
+    // 요청 날짜 기준
+    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
+    if(!reqDate) return;
+    const dk=tds(reqDate);
     if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
     dayData[dk].c+=c; dayData[dk].n+=n; dayData[dk].rows.push(r);
   });
