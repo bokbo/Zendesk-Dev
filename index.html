@@ -1734,7 +1734,7 @@ function buildMonthlyData() {
     monthSet.add(monthKey);
 
     // 사이트: applyIdMapping에서 '사이트' 필드가 있으면 우선 사용
-    const site = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
+    const site = r['사이트'] || getSiteName(r[ZOC]||r['조직']||'', r[ZSY]||r['대상시스템']||'');
 
     // 설정 시트 월별 분할 규칙 적용
     if (r['_split_rules'] && r['_split_rules'].length > 0) {
@@ -2064,8 +2064,7 @@ function showWkDetail(site){
   wkDetailSite=site;
   document.querySelectorAll('#wk-tbody tr').forEach(t=>t.classList.remove('mo-active'));
   const tr=document.querySelector(`#wk-tbody tr[data-wksite="${site}"]`);if(tr)tr.classList.add('mo-active');
-  const sel=document.getElementById('wk-sel').value;
-  const weeks=sel?[sel]:wkWeeks;
+  const weeks = wpSelectedWeekKey ? [wpSelectedWeekKey] : wkWeeks;
   let rows=[];weeks.forEach(wk=>{if(wkData[wk]&&wkData[wk][site])rows.push(...wkData[wk][site].rows);});
   rows.sort((a,b)=>new Date(gdd(a,ZQC,ZQF))-new Date(gdd(b,ZQC,ZQF)));
   document.getElementById('wk-dp-title').textContent=`${site} · ${rows.length}건`;
@@ -2076,8 +2075,7 @@ function showWkDetail(site){
 function showWkDetailOther(){
   if(wkDetailSite==='__other__'&&!document.getElementById('wk-dp').classList.contains('hidden')){closeWkDetail();return;}
   wkDetailSite='__other__';
-  const sel=document.getElementById('wk-sel').value;
-  const weeks=sel?[sel]:wkWeeks;
+  const weeks = wpSelectedWeekKey ? [wpSelectedWeekKey] : wkWeeks;
   let rows=[];weeks.forEach(wk=>{Object.entries(wkData[wk]||{}).forEach(([s,v])=>{if(!SITE_ORDER.includes(s))rows.push(...v.rows);});});
   rows.sort((a,b)=>new Date(gdd(a,ZQC,ZQF))-new Date(gdd(b,ZQC,ZQF)));
   document.getElementById('wk-dp-title').textContent=`기타 사이트 · ${rows.length}건`;
@@ -2401,12 +2399,14 @@ function showMoDetail(site) {
   const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
   const sel = (_y&&_m) ? _y+_m : '';
   const rows = ZR.filter(r=>{
-    const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
+    const rSite = r['사이트'] || getSiteName(r[ZOC]||r['조직']||'', r[ZSY]||r['대상시스템']||'');
     if(rSite !== site) return false;
+    // 시간 없으면 제외
+    if(parseH(r[ZHC])===0 && parseH(r[ZNC])===0) return false;
     if(sel){
-      const effDate = getEffDate(r);
-      if(!effDate) return false;
-      const ym = `${effDate.getFullYear()}년${effDate.getMonth()+1}월`;
+      const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
+      if(!reqDate) return false;
+      const ym = `${reqDate.getFullYear()}년${reqDate.getMonth()+1}월`;
       return ym === sel;
     }
     return true;
@@ -2426,12 +2426,13 @@ function showMoDetailOther() {
   const _m=document.getElementById('mo-month')?document.getElementById('mo-month').value:'';
   const sel = (_y&&_m) ? _y+_m : '';
   const rows = ZR.filter(r=>{
-    const rSite = r['사이트'] || getSiteName(r[ZOC]||'', r[ZSY]||'');
+    const rSite = r['사이트'] || getSiteName(r[ZOC]||r['조직']||'', r[ZSY]||r['대상시스템']||'');
     if(SITE_ORDER.includes(rSite)) return false;
+    if(parseH(r[ZHC])===0 && parseH(r[ZNC])===0) return false;
     if(sel){
-      const effDate = getEffDate(r);
-      if(!effDate) return false;
-      const ym = `${effDate.getFullYear()}년${effDate.getMonth()+1}월`;
+      const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
+      if(!reqDate) return false;
+      const ym = `${reqDate.getFullYear()}년${reqDate.getMonth()+1}월`;
       return ym === sel;
     }
     return true;
