@@ -1393,45 +1393,33 @@ const ZD_SCOPE     = 'read';
 
 let zdAccessToken = sessionStorage.getItem('zd_token') || '';
 
-// 페이지 로드 시 OAuth 콜백 처리 (code가 URL에 있으면)
+// 페이지 로드 시 OAuth 콜백 처리
 (async function checkOAuthCallback() {
   const params = new URLSearchParams(location.search);
   const code = params.get('code');
-  const state = params.get('state');
   if (!code) return;
-
-  // state 검증
-  const savedState = sessionStorage.getItem('zd_oauth_state');
-  if (state !== savedState) {
-    alert('보안 오류: state 불일치');
-    return;
-  }
 
   // URL 정리 (뒤로가기 시 재처리 방지)
   history.replaceState({}, '', location.pathname);
 
-  // PKCE: code_verifier 꺼내기
-  const verifier = sessionStorage.getItem('zd_code_verifier');
+  // state에서 verifier 추출 (sessionStorage 우회)
+  // state 형식: "randomState__verifier"
+  const stateParam = params.get('state') || '';
+  const [, verifier] = stateParam.split('__');
 
-  // code → access_token 교환
+  setZdStatus('loading', '로그인 처리 중...');
+
+  // code → access_token 교환 (Azure Function 경유)
   try {
-    const res = await fetch(`https://${ZD_SUBDOMAIN}.zendesk.com/oauth/tokens`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grant_type:    'authorization_code',
-        code,
-        client_id:     ZD_CLIENT_ID,
-        redirect_uri:  ZD_REDIRECT,
-        code_verifier: verifier,
-        scope:         ZD_SCOPE,
-      })
-    });
+    const res = await fetch(
+      `/api/zendesk?code=${encodeURIComponent(code)}&verifier=${encodeURIComponent(verifier||'')}`,
+      { method: 'GET' }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    if (!json.access_token) throw new Error(json.error_description || json.error || '토큰 발급 실패');
+    if (!json.access_token) throw new Error(json.error || '토큰 발급 실패');
     zdAccessToken = json.access_token;
-    sessionStorage.setItem('zd_token', zdAccessToken);
-    // 자동 로드
+    try { sessionStorage.setItem('zd_token', zdAccessToken); } catch(e) {}
     zdLoadTickets();
   } catch(e) {
     setZdStatus('err', '토큰 교환 실패: ' + e.message);
@@ -1442,8 +1430,8 @@ let zdAccessToken = sessionStorage.getItem('zd_token') || '';
 async function generatePKCE() {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  const verifier = btoa(String.fromCharCode(...array))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const verifier = Array.from(array, b => chars[b % chars.length]).join('');
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
@@ -1462,22 +1450,20 @@ function switchZdSource(type, btn) {
 async function zdOAuthLogin() {
   if (zdAccessToken) { zdLoadTickets(); return; }
 
-  const state = Math.random().toString(36).slice(2);
   const { verifier, challenge } = await generatePKCE();
-
-  sessionStorage.setItem('zd_oauth_state',    state);
-  sessionStorage.setItem('zd_code_verifier',  verifier);
+  const randomPart = Math.random().toString(36).slice(2);
+  // verifier를 state에 포함 (sessionStorage 대신)
+  const state = `${randomPart}__${verifier}`;
 
   const authUrl = `https://${ZD_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`
     + `?response_type=code`
     + `&client_id=${ZD_CLIENT_ID}`
     + `&redirect_uri=${encodeURIComponent(ZD_REDIRECT)}`
     + `&scope=${ZD_SCOPE}`
-    + `&state=${state}`
+    + `&state=${encodeURIComponent(state)}`
     + `&code_challenge=${challenge}`
     + `&code_challenge_method=S256`;
 
-  // 현재 탭에서 이동 (리디렉트 방식)
   location.href = authUrl;
 }
 
