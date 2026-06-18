@@ -1797,95 +1797,80 @@ function buildMonthlyData() {
   ZR.forEach(r=>{
     // 처리자 필터
     if(mwf && wc2 && r[wc2] !== mwf) return;
-    // 시간 없으면 제외 (상태 무관, 시간 기록된 것만)
-    const cust = parseH(r[ZHC]);
-    const total = parseH(r[ZNC]);
-    if(cust === 0 && total === 0) return;
-    // 날짜 기준: 요청 날짜 (없으면 업데이트시간)
-    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
-    if(!reqDate) return;
-    const y=reqDate.getFullYear(), m=reqDate.getMonth()+1;
-    const monthKey=`${y}년${m}월`;
-    monthSet.add(monthKey);
 
-    // 사이트: applyIdMapping에서 '사이트' 필드가 있으면 우선 사용
+    // 사이트 결정
     const _rawSys = r[ZSY]||r['대상시스템']||'';
     const _mapped = API_VALUE_TO_SITE[_rawSys];
-    const site = r['사이트'] || (_mapped !== undefined ? (_mapped || getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys))) : getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys)));
+    const site = r['사이트'] || (_mapped !== undefined
+      ? (_mapped || getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys)))
+      : getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys)));
 
-    // 설정 시트 월별 분할 규칙 적용
+    // 설정 시트 특수 규칙 (우선 적용)
     if (r['_split_rules'] && r['_split_rules'].length > 0) {
+      const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || new Date();
       const year = reqDate.getFullYear();
       r['_split_rules'].forEach(sp=>{
         const ym = `${year}년${sp.month}월`;
         if(!moData[ym]) moData[ym]={};
         if(!moData[ym][site]) moData[ym][site]={c:0,n:0,m:0,cnt:0};
-        moData[ym][site].c += sp.hours;
-        moData[ym][site].n += sp.hours;
-        moData[ym][site].cnt++;
+        moData[ym][site].c += sp.hours; moData[ym][site].n += sp.hours; moData[ym][site].cnt++;
         monthSet.add(ym);
       });
       return;
     }
-
-    // 요청일부터 평일 N일로 균등 분할
     if (r['_split_weekdays']) {
+      const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || new Date();
       const n = r['_split_weekdays'];
-      const totalH = cust || total;
+      const cust = parseH(r[ZHC]), total2 = parseH(r[ZNC]);
+      const totalH = cust || total2;
       const perDay = totalH / n;
-      // 요청일부터 평일만 카운트해서 날짜 수집
-      const dates = [];
-      const cur = new Date(reqDate);
-      while(dates.length < n) {
-        const dow = cur.getDay();
-        if(dow !== 0 && dow !== 6) dates.push(new Date(cur)); // 월~금
-        cur.setDate(cur.getDate()+1);
-      }
+      const dates = []; const cur = new Date(reqDate);
+      while(dates.length < n){ const dow=cur.getDay(); if(dow!==0&&dow!==6) dates.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
       dates.forEach(d=>{
-        const y2=d.getFullYear(), mo2=d.getMonth()+1;
-        const ym2=`${y2}년${mo2}월`;
-        const dk=tds(d);
-        if(!moData[ym2]) moData[ym2]={};
-        if(!moData[ym2][site]) moData[ym2][site]={c:0,n:0,m:0,cnt:0};
-        moData[ym2][site].c+=perDay; moData[ym2][site].n+=perDay; moData[ym2][site].cnt++;
-        monthSet.add(ym2);
+        const ym2=`${d.getFullYear()}년${d.getMonth()+1}월`; const dk=tds(d);
+        if(!moData[ym2]) moData[ym2]={}; if(!moData[ym2][site]) moData[ym2][site]={c:0,n:0,m:0,cnt:0};
+        moData[ym2][site].c+=perDay; moData[ym2][site].n+=perDay; moData[ym2][site].cnt++; monthSet.add(ym2);
         if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
-        dayData[dk].c+=perDay; dayData[dk].n+=perDay;
-        dayData[dk].rows.push({...r,'_virtual_day':dk,'_perday_h':perDay});
+        dayData[dk].c+=perDay; dayData[dk].n+=perDay; dayData[dk].rows.push({...r,'_virtual_day':dk,'_perday_h':perDay});
       });
       return;
     }
-
-    // 특정 날짜들로 균등 분할
     if (r['_split_days']) {
-      const sd = r['_split_days'];
-      const year = reqDate.getFullYear();
-      const totalH = cust || total;
-      const perDay = totalH / sd.days.length;
+      const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || new Date();
+      const sd = r['_split_days']; const year = reqDate.getFullYear();
+      const cust = parseH(r[ZHC]), total2 = parseH(r[ZNC]);
+      const totalH = cust || total2; const perDay = totalH / sd.days.length;
       const ym = `${year}년${sd.month}월`;
-      // 월별 집계에는 합산
-      if(!moData[ym]) moData[ym]={};
-      if(!moData[ym][site]) moData[ym][site]={c:0,n:0,m:0,cnt:0};
-      moData[ym][site].c += totalH;
-      moData[ym][site].n += totalH;
-      moData[ym][site].cnt++;
-      monthSet.add(ym);
-      // 일별 집계에는 날짜별로 분산
+      if(!moData[ym]) moData[ym]={}; if(!moData[ym][site]) moData[ym][site]={c:0,n:0,m:0,cnt:0};
+      moData[ym][site].c+=totalH; moData[ym][site].n+=totalH; moData[ym][site].cnt++; monthSet.add(ym);
       sd.days.forEach(day=>{
-        const dk = `${year}-${String(sd.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dk=`${year}-${String(sd.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
-        dayData[dk].c += perDay;
-        dayData[dk].n += perDay;
-        dayData[dk].rows.push({...r, '_virtual_day': dk, '_perday_h': perDay});
+        dayData[dk].c+=perDay; dayData[dk].n+=perDay; dayData[dk].rows.push({...r,'_virtual_day':dk,'_perday_h':perDay});
       });
       return;
     }
 
-    if(!moData[monthKey]) moData[monthKey]={};
-    if(!moData[monthKey][site]) moData[monthKey][site]={c:0,n:0,m:0,cnt:0};
-    moData[monthKey][site].c += cust;
-    moData[monthKey][site].n += total;
-    moData[monthKey][site].cnt++;
+    // ── 자동 분산: 요청일~완료일 사이 평일로 균등 분산 ──
+    const spread = spreadTicketHours(r);
+    spread.forEach(({date, c, n}) => {
+      const y=date.getFullYear(), m=date.getMonth()+1;
+      const monthKey=`${y}년${m}월`;
+      const dk=tds(date);
+      monthSet.add(monthKey);
+      if(!moData[monthKey]) moData[monthKey]={};
+      if(!moData[monthKey][site]) moData[monthKey][site]={c:0,n:0,m:0,cnt:0};
+      moData[monthKey][site].c += c;
+      moData[monthKey][site].n += n;
+      moData[monthKey][site].cnt++;
+      // 일별 데이터에도 반영
+      if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
+      dayData[dk].c += c; dayData[dk].n += n;
+      // 첫날에만 티켓 행 추가 (중복 방지)
+      if(date.getTime() === spread[0].date.getTime()) {
+        dayData[dk].rows.push(r);
+      }
+    });
   });
 
   // 월 정렬 (오래된 순)
@@ -1936,19 +1921,21 @@ function buildWeeklyData() {
   const wc2=fc(['처리자','assignee','agent']);
   ZR.forEach(r=>{
     if(wkf&&wc2&&r[wc2]!==wkf) return;
-    // 시간 없으면 제외
-    const c=parseH(r[ZHC]), n=parseH(r[ZNC]);
-    if(c===0 && n===0) return;
-    // 요청 날짜 기준
-    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
-    if(!reqDate) return;
-    const {key}=getWeekKey(reqDate);
+    // 사이트 결정
     const _rawSysW = r[ZSY]||r['대상시스템']||'';
     const _mappedW = API_VALUE_TO_SITE[_rawSysW];
     const site=r['사이트']||(_mappedW!==undefined?(_mappedW||getSiteName(r[ZOC]||r['조직']||'',apiSysToStd(_rawSysW))):getSiteName(r[ZOC]||r['조직']||'',apiSysToStd(_rawSysW)));
-    if(!wkData[key]) wkData[key]={};
-    if(!wkData[key][site]) wkData[key][site]={c:0,n:0,rows:[]};
-    wkData[key][site].c+=c; wkData[key][site].n+=n; wkData[key][site].rows.push(r);
+    // 자동 분산: 요청일~완료일 평일로 균등 분산
+    const spread = spreadTicketHours(r);
+    spread.forEach(({date, c, n}) => {
+      const {key} = getWeekKey(date);
+      if(!wkData[key]) wkData[key]={};
+      if(!wkData[key][site]) wkData[key][site]={c:0,n:0,rows:[]};
+      wkData[key][site].c+=c; wkData[key][site].n+=n;
+      if(date.getTime() === spread[0].date.getTime()) {
+        wkData[key][site].rows.push(r);
+      }
+    });
   });
   wkWeeks=Object.keys(wkData).sort((a,b)=>{
     const ya=parseInt(a),yb=parseInt(b);
@@ -2173,15 +2160,14 @@ function buildDailyData(){
   const wc2=fc(['처리자','assignee','agent']);
   ZR.forEach(r=>{
     if(wf&&wc2&&r[wc2]!==wf) return;
-    // 시간 없으면 제외
-    const c=parseH(r[ZHC]),n=parseH(r[ZNC]);
-    if(c===0 && n===0) return;
-    // 요청 날짜 기준
-    const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
-    if(!reqDate) return;
-    const dk=tds(reqDate);
-    if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
-    dayData[dk].c+=c; dayData[dk].n+=n; dayData[dk].rows.push(r);
+    // 자동 분산: 요청일~완료일 평일로 균등 분산 (시간 0이면 요청일에 0시간)
+    const spread = spreadTicketHours(r);
+    spread.forEach(({date, c, n}, idx) => {
+      const dk = tds(date);
+      if(!dayData[dk]) dayData[dk]={c:0,n:0,rows:[]};
+      dayData[dk].c += c; dayData[dk].n += n;
+      if(idx === 0) dayData[dk].rows.push(r);
+    });
   });
   renderCalendar();
 }
@@ -2292,6 +2278,43 @@ function copyDetail(tbodyId,toastId){
   });
 }
 
+
+// 두 날짜 사이 평일 목록 반환 (요청일~완료일 포함)
+function getWeekdays(startDate, endDate) {
+  const days = [];
+  const cur = new Date(startDate); cur.setHours(0,0,0,0);
+  const end = new Date(endDate);   end.setHours(0,0,0,0);
+  while(cur <= end) {
+    const dow = cur.getDay();
+    if(dow !== 0 && dow !== 6) days.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days.length > 0 ? days : [new Date(startDate)]; // 평일 없으면 시작일 하나
+}
+
+// 티켓 1건의 날짜별 시간 분산 결과 반환
+// [{date: Date, c: hours, n: hours}]
+function spreadTicketHours(r) {
+  const cust  = parseH(r[ZHC]);
+  const total = parseH(r[ZNC]);
+  const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'');
+  const endDate = pd(r[ZEC]||'') || pd(r[ZFC]||'');
+
+  // 시작일
+  const startD = reqDate || new Date();
+  // 종료일 (없으면 시작일과 동일)
+  const endD   = endDate || startD;
+
+  // 시간이 0이면 시작일 하루에 0시간
+  if(cust === 0 && total === 0) {
+    return [{date: startD, c: 0, n: 0}];
+  }
+
+  const weekdays = getWeekdays(startD, endD);
+  const perC = cust  / weekdays.length;
+  const perN = total / weekdays.length;
+  return weekdays.map(d => ({date: d, c: perC, n: perN}));
+}
 
 function parseH(val) {
   if(!val) return 0;
