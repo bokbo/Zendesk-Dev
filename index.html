@@ -61,6 +61,15 @@ button:hover{background:var(--bg2);}
 .ct tbody tr.trow{font-weight:600;background:var(--bg2);cursor:default;}
 .ct tbody td{padding:9px 14px;}
 .ct tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.zd-source-tabs{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--bd2);border-radius:var(--rm);overflow:hidden;}
+.zd-src-btn{flex:1;padding:8px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;background:none;border:none;color:var(--cs);transition:all 0.15s;}
+.zd-src-btn.active{background:#6264a7;color:#fff;}
+.zd-src-btn:not(.active):hover{background:var(--bg3);}
+.zd-api-box{background:var(--bg2);border-radius:var(--rl);padding:1rem;margin-bottom:1rem;}
+.zd-api-status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:var(--rm);display:none;}
+.zd-api-status.ok{background:var(--bgg);color:var(--cg);display:block;}
+.zd-api-status.err{background:var(--bgd);color:var(--cd);display:block;}
+.zd-api-status.loading{background:var(--bgi);color:var(--ci);display:block;}
 
 /* 주 선택 달력 */
 .week-picker-wrap{position:relative;display:inline-block;width:100%;}
@@ -166,6 +175,15 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mtw table tbody tr.sum-row{font-weight:600;background:var(--bg2);}
 .mtw table tbody td{padding:7px 12px;white-space:nowrap;}
 .mtw table tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.zd-source-tabs{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--bd2);border-radius:var(--rm);overflow:hidden;}
+.zd-src-btn{flex:1;padding:8px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;background:none;border:none;color:var(--cs);transition:all 0.15s;}
+.zd-src-btn.active{background:#6264a7;color:#fff;}
+.zd-src-btn:not(.active):hover{background:var(--bg3);}
+.zd-api-box{background:var(--bg2);border-radius:var(--rl);padding:1rem;margin-bottom:1rem;}
+.zd-api-status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:var(--rm);display:none;}
+.zd-api-status.ok{background:var(--bgg);color:var(--cg);display:block;}
+.zd-api-status.err{background:var(--bgd);color:var(--cd);display:block;}
+.zd-api-status.loading{background:var(--bgi);color:var(--ci);display:block;}
 
 /* 주 선택 달력 */
 .week-picker-wrap{position:relative;display:inline-block;width:100%;}
@@ -225,6 +243,15 @@ table.dt tbody td.dc{white-space:nowrap;}
 .mo-detail-title{font-size:12px;font-weight:500;color:var(--ct);}
 .mo-detail-close{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:var(--cs);}
 .num{text-align:right;font-variant-numeric:tabular-nums;}
+.zd-source-tabs{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--bd2);border-radius:var(--rm);overflow:hidden;}
+.zd-src-btn{flex:1;padding:8px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;background:none;border:none;color:var(--cs);transition:all 0.15s;}
+.zd-src-btn.active{background:#6264a7;color:#fff;}
+.zd-src-btn:not(.active):hover{background:var(--bg3);}
+.zd-api-box{background:var(--bg2);border-radius:var(--rl);padding:1rem;margin-bottom:1rem;}
+.zd-api-status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:var(--rm);display:none;}
+.zd-api-status.ok{background:var(--bgg);color:var(--cg);display:block;}
+.zd-api-status.err{background:var(--bgd);color:var(--cd);display:block;}
+.zd-api-status.loading{background:var(--bgi);color:var(--ci);display:block;}
 
 /* 주 선택 달력 */
 .week-picker-wrap{position:relative;display:inline-block;width:100%;}
@@ -288,11 +315,32 @@ table.dt tbody td.dc{white-space:nowrap;}
 <body>
 
 <!-- 파일 업로드 -->
-<div class="upload-card" id="dz" onclick="document.getElementById('fi-zd').click()">
-  <div class="uc-label">🎫 젠데스크 파일 업로드</div>
-  <div class="uc-sub">CSV / XLSX 드래그 또는 클릭 — 티켓 집계 + 월별 처리시간 모두 이 파일 하나로</div>
-  <div class="uc-ok hidden" id="lbl-zd"></div>
-  <input type="file" id="fi-zd" accept=".csv,.xlsx,.xls" style="display:none">
+<!-- 소스 선택 -->
+<div class="zd-source-tabs">
+  <button class="zd-src-btn active" onclick="switchZdSource('api', this)">☁️ Zendesk API 자동 로드</button>
+  <button class="zd-src-btn" onclick="switchZdSource('file', this)">📁 파일 직접 업로드</button>
+</div>
+
+<!-- API 소스 -->
+<div id="zd-src-api">
+  <div class="zd-api-box">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Zendesk 연결</div>
+    <div style="font-size:12px;color:var(--cs);margin-bottom:12px;">GoWorks + 구독관리 보기의 티켓을 자동으로 불러옵니다.</div>
+    <button class="bp" onclick="zdOAuthLogin()" id="btn-zd-login" style="width:100%;padding:8px;">
+      🔐 Zendesk 로그인해서 불러오기
+    </button>
+    <div id="zd-api-status" class="zd-api-status"></div>
+  </div>
+</div>
+
+<!-- 파일 업로드 소스 -->
+<div id="zd-src-file" class="hidden">
+  <div class="upload-card" id="dz" onclick="document.getElementById('fi-zd').click()">
+    <div class="uc-label">🎫 젠데스크 파일 업로드</div>
+    <div class="uc-sub">CSV / XLSX 드래그 또는 클릭 — 티켓 집계 + 월별 처리시간 모두 이 파일 하나로</div>
+    <div class="uc-ok hidden" id="lbl-zd"></div>
+    <input type="file" id="fi-zd" accept=".csv,.xlsx,.xls" style="display:none">
+  </div>
 </div>
 
 <!-- 결과 -->
@@ -1337,7 +1385,138 @@ function hf(file) {
 }
 
 // ── 파싱 ─────────────────────────────────────────────
-// 설정 규칙 저장소
+// ── Zendesk OAuth (Authorization Code flow) ─────────
+const ZD_SUBDOMAIN  = 'gowit';
+const ZD_CLIENT_ID  = 'zendesk_app_';
+const ZD_API_BASE   = '/api/zendesk';   // Azure Function 프록시
+const ZD_SCOPE      = 'read';
+const ZD_REDIRECT   = 'https://green-mushroom-0c7b12500.7.azurestaticapps.net/api/zendesk/callback';
+
+let zdAccessToken = sessionStorage.getItem('zd_token') || '';
+
+function switchZdSource(type, btn) {
+  document.querySelectorAll('.zd-src-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('zd-src-api').classList.toggle('hidden',  type !== 'api');
+  document.getElementById('zd-src-file').classList.toggle('hidden', type !== 'file');
+}
+
+function zdOAuthLogin() {
+  if (zdAccessToken) { zdLoadTickets(); return; }
+  // state 저장
+  const state = Math.random().toString(36).slice(2);
+  sessionStorage.setItem('zd_oauth_state', state);
+  // Authorization Code flow URL
+  const authUrl = `https://${ZD_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`
+    + `?response_type=code`
+    + `&client_id=${ZD_CLIENT_ID}`
+    + `&redirect_uri=${encodeURIComponent(ZD_REDIRECT)}`
+    + `&scope=${ZD_SCOPE}`
+    + `&state=${state}`;
+  // 팝업
+  const popup = window.open(authUrl, 'zd_oauth', 'width=600,height=700,left=300,top=100');
+  // postMessage로 토큰 수신
+  const handler = async (e) => {
+    if (!e.data || !e.data.zd_code) return;
+    window.removeEventListener('message', handler);
+    if (e.data.zd_state !== sessionStorage.getItem('zd_oauth_state')) {
+      setZdStatus('err', '보안 오류: state 불일치'); return;
+    }
+    // code → token (Azure Function 경유)
+    setZdStatus('loading', '토큰 교환 중...');
+    try {
+      const res = await fetch(`${ZD_API_BASE}?code=${e.data.zd_code}`);
+      const json = await res.json();
+      if (!json.access_token) throw new Error(json.error || '토큰 발급 실패');
+      zdAccessToken = json.access_token;
+      sessionStorage.setItem('zd_token', zdAccessToken);
+      zdLoadTickets();
+    } catch(err) {
+      setZdStatus('err', '토큰 교환 실패: ' + err.message);
+      resetLoginBtn();
+    }
+  };
+  window.addEventListener('message', handler);
+}
+
+// OAuth 콜백 페이지에서 code를 부모에게 전달
+(function checkOAuthCallback() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code'), state = params.get('state');
+  if (code && window.opener) {
+    window.opener.postMessage({ zd_code: code, zd_state: state }, '*');
+    window.close();
+  }
+})();
+
+function setZdStatus(type, msg) {
+  const el = document.getElementById('zd-api-status');
+  el.className = `zd-api-status ${type}`;
+  el.textContent = msg;
+}
+function resetLoginBtn() {
+  const btn = document.getElementById('btn-zd-login');
+  btn.disabled = false;
+  btn.textContent = '🔐 Zendesk 로그인해서 불러오기';
+}
+
+async function zdLoadTickets() {
+  const btn = document.getElementById('btn-zd-login');
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  setZdStatus('loading', '티켓 불러오는 중...');
+  try {
+    const res = await fetch(`${ZD_API_BASE}?token=${zdAccessToken}`);
+    if (res.status === 401) {
+      zdAccessToken = '';
+      sessionStorage.removeItem('zd_token');
+      setZdStatus('err', '토큰 만료 — 다시 로그인해주세요.');
+      resetLoginBtn(); return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const rows = json.tickets || [];
+    if (!rows.length) throw new Error('티켓이 없습니다.');
+
+    ZC = Object.keys(rows[0]);
+    ZR = rows.map(r => applyIdMapping(r));
+    setZdStatus('ok', `✓ ${rows.length}건 로드 완료`);
+    btn.textContent = `✓ ${rows.length}건 (다시 불러오기)`;
+    btn.disabled = false;
+    setupAfterLoad(`Zendesk API (${rows.length}건)`);
+  } catch(e) {
+    setZdStatus('err', '불러오기 실패: ' + e.message);
+    resetLoginBtn();
+  }
+}
+
+function setupAfterLoad(name) {
+  document.getElementById('lbl-zd').textContent = `✓ ${name}`;
+  document.getElementById('lbl-zd').classList.remove('hidden');
+  const wSel = document.getElementById('fw');
+  wSel.innerHTML = '<option value="">전체</option>';
+  const wc = fc(['처리자','assignee','agent']);
+  if (wc) [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort().forEach(w => {
+    const o = document.createElement('option'); o.value = o.textContent = w; wSel.appendChild(o);
+  });
+  ['mfw','wk-fw','day-fw'].forEach(id => {
+    const sel = document.getElementById(id); if (!sel) return;
+    sel.innerHTML = '<option value="">전체</option>';
+    [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort().forEach(w => {
+      const o = document.createElement('option'); o.value = o.textContent = w; sel.appendChild(o);
+    });
+  });
+  const today = new Date(), dow = today.getDay() === 0 ? 7 : today.getDay();
+  const pm = new Date(today); pm.setDate(today.getDate() - dow - 6);
+  document.getElementById('ws').value = tds(pm);
+  document.getElementById('result-area').classList.add('hidden');
+  closeDetail();
+  buildMonthlyData();
+  document.getElementById('main-area').classList.remove('hidden');
+  stab2('zd');
+}
+
+// ── 설정 규칙 저장소// ── 설정 규칙 저장소
 let SETTINGS = []; // [{id, rule, raw}]
 
 function parseSettings(wb) {
