@@ -1550,6 +1550,19 @@ async function zdLoadTickets() {
 function setupAfterLoad(name) {
   document.getElementById('lbl-zd').textContent = `✓ ${name}`;
   document.getElementById('lbl-zd').classList.remove('hidden');
+  // ZC가 세팅된 후 컬럼 변수 초기화 (API 로드 시 필요)
+  if(!ZSC) ZSC = fc(['티켓 상태','상태','status'])||'';
+  if(!ZSY) ZSY = fc(['대상시스템','system','product'])||'';
+  if(!ZOC) ZOC = fc(['조직','organization','org'])||'';
+  if(!ZTC) ZTC = fc(['제목','title','subject'])||'';
+  if(!ZEC) ZEC = fc(['종료일','closed','resolved_at','solved_at'])||'';
+  if(!ZFC) ZFC = fc(['업데이트 시간','업데이트','updated','updated_at'])||'';
+  if(!ZQC) ZQC = fc(['요청일'])||'';
+  if(!ZQF) ZQF = fc(['요청 날짜','요청날짜','created','created_at'])||'';
+  if(!ZHC) ZHC = fc(['고객 소요시간','customer'])||'';
+  if(!ZNC) ZNC = fc(['전체 소요시간','total'])||'';
+  if(!ZCC) ZCC = fc(['CSR 유형','CSR유형','csr'])||'';
+  if(!ZDC) ZDC = fc(['처리내역','처리 내역','description'])||'';
   const wc = fc(['처리자','assignee','agent']);
   const workers = wc ? [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort() : [];
   ['fw','mfw','wk-fw','day-fw'].forEach(id => {
