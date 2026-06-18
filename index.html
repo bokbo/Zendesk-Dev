@@ -1385,14 +1385,72 @@ function hf(file) {
 }
 
 // ── 파싱 ─────────────────────────────────────────────
-// ── Zendesk OAuth (Authorization Code flow) ─────────
-const ZD_SUBDOMAIN  = 'gowit';
-const ZD_CLIENT_ID  = 'zendesk_app_';
-const ZD_API_BASE   = '/api/zendesk';   // Azure Function 프록시
-const ZD_SCOPE      = 'read';
-const ZD_REDIRECT   = 'https://green-mushroom-0c7b12500.7.azurestaticapps.net/api/zendesk/callback';
+// ── Zendesk OAuth (PKCE, Public Client) ─────────────
+const ZD_SUBDOMAIN = 'gowit';
+const ZD_CLIENT_ID = 'zendesk_app_';
+const ZD_REDIRECT  = 'https://green-mushroom-0c7b12500.7.azurestaticapps.net/index.html';
+const ZD_SCOPE     = 'read';
 
 let zdAccessToken = sessionStorage.getItem('zd_token') || '';
+
+// 페이지 로드 시 OAuth 콜백 처리 (code가 URL에 있으면)
+(async function checkOAuthCallback() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  if (!code) return;
+
+  // state 검증
+  const savedState = sessionStorage.getItem('zd_oauth_state');
+  if (state !== savedState) {
+    alert('보안 오류: state 불일치');
+    return;
+  }
+
+  // URL 정리 (뒤로가기 시 재처리 방지)
+  history.replaceState({}, '', location.pathname);
+
+  // PKCE: code_verifier 꺼내기
+  const verifier = sessionStorage.getItem('zd_code_verifier');
+
+  // code → access_token 교환
+  try {
+    const res = await fetch(`https://${ZD_SUBDOMAIN}.zendesk.com/oauth/tokens`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type:    'authorization_code',
+        code,
+        client_id:     ZD_CLIENT_ID,
+        redirect_uri:  ZD_REDIRECT,
+        code_verifier: verifier,
+        scope:         ZD_SCOPE,
+      })
+    });
+    const json = await res.json();
+    if (!json.access_token) throw new Error(json.error_description || json.error || '토큰 발급 실패');
+    zdAccessToken = json.access_token;
+    sessionStorage.setItem('zd_token', zdAccessToken);
+    // 자동 로드
+    zdLoadTickets();
+  } catch(e) {
+    setZdStatus('err', '토큰 교환 실패: ' + e.message);
+  }
+})();
+
+// PKCE 헬퍼
+async function generatePKCE() {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const verifier = btoa(String.fromCharCode(...array))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  return { verifier, challenge };
+}
 
 function switchZdSource(type, btn) {
   document.querySelectorAll('.zd-src-btn').forEach(b => b.classList.remove('active'));
@@ -1401,89 +1459,102 @@ function switchZdSource(type, btn) {
   document.getElementById('zd-src-file').classList.toggle('hidden', type !== 'file');
 }
 
-function zdOAuthLogin() {
+async function zdOAuthLogin() {
   if (zdAccessToken) { zdLoadTickets(); return; }
-  // state 저장
+
   const state = Math.random().toString(36).slice(2);
-  sessionStorage.setItem('zd_oauth_state', state);
-  // Authorization Code flow URL
+  const { verifier, challenge } = await generatePKCE();
+
+  sessionStorage.setItem('zd_oauth_state',    state);
+  sessionStorage.setItem('zd_code_verifier',  verifier);
+
   const authUrl = `https://${ZD_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`
     + `?response_type=code`
     + `&client_id=${ZD_CLIENT_ID}`
     + `&redirect_uri=${encodeURIComponent(ZD_REDIRECT)}`
     + `&scope=${ZD_SCOPE}`
-    + `&state=${state}`;
-  // 팝업
-  const popup = window.open(authUrl, 'zd_oauth', 'width=600,height=700,left=300,top=100');
-  // postMessage로 토큰 수신
-  const handler = async (e) => {
-    if (!e.data || !e.data.zd_code) return;
-    window.removeEventListener('message', handler);
-    if (e.data.zd_state !== sessionStorage.getItem('zd_oauth_state')) {
-      setZdStatus('err', '보안 오류: state 불일치'); return;
-    }
-    // code → token (Azure Function 경유)
-    setZdStatus('loading', '토큰 교환 중...');
-    try {
-      const res = await fetch(`${ZD_API_BASE}?code=${e.data.zd_code}`);
-      const json = await res.json();
-      if (!json.access_token) throw new Error(json.error || '토큰 발급 실패');
-      zdAccessToken = json.access_token;
-      sessionStorage.setItem('zd_token', zdAccessToken);
-      zdLoadTickets();
-    } catch(err) {
-      setZdStatus('err', '토큰 교환 실패: ' + err.message);
-      resetLoginBtn();
-    }
-  };
-  window.addEventListener('message', handler);
-}
+    + `&state=${state}`
+    + `&code_challenge=${challenge}`
+    + `&code_challenge_method=S256`;
 
-// OAuth 콜백 페이지에서 code를 부모에게 전달
-(function checkOAuthCallback() {
-  const params = new URLSearchParams(location.search);
-  const code = params.get('code'), state = params.get('state');
-  if (code && window.opener) {
-    window.opener.postMessage({ zd_code: code, zd_state: state }, '*');
-    window.close();
-  }
-})();
+  // 현재 탭에서 이동 (리디렉트 방식)
+  location.href = authUrl;
+}
 
 function setZdStatus(type, msg) {
   const el = document.getElementById('zd-api-status');
+  if (!el) return;
   el.className = `zd-api-status ${type}`;
   el.textContent = msg;
 }
 function resetLoginBtn() {
   const btn = document.getElementById('btn-zd-login');
+  if (!btn) return;
   btn.disabled = false;
   btn.textContent = '🔐 Zendesk 로그인해서 불러오기';
 }
 
 async function zdLoadTickets() {
   const btn = document.getElementById('btn-zd-login');
-  btn.disabled = true;
-  btn.textContent = '불러오는 중...';
+  if (btn) { btn.disabled = true; btn.textContent = '불러오는 중...'; }
   setZdStatus('loading', '티켓 불러오는 중...');
-  try {
-    const res = await fetch(`${ZD_API_BASE}?token=${zdAccessToken}`);
-    if (res.status === 401) {
-      zdAccessToken = '';
-      sessionStorage.removeItem('zd_token');
-      setZdStatus('err', '토큰 만료 — 다시 로그인해주세요.');
-      resetLoginBtn(); return;
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    const rows = json.tickets || [];
-    if (!rows.length) throw new Error('티켓이 없습니다.');
 
-    ZC = Object.keys(rows[0]);
-    ZR = rows.map(r => applyIdMapping(r));
-    setZdStatus('ok', `✓ ${rows.length}건 로드 완료`);
-    btn.textContent = `✓ ${rows.length}건 (다시 불러오기)`;
-    btn.disabled = false;
-    setupAfterLoad(`Zendesk API (${rows.length}건)`);
+  try {
+    let allRows = [], nextUrl =
+      `https://${ZD_SUBDOMAIN}.zendesk.com/api/v2/views/58996168448793/tickets.json?per_page=100&include=users,organizations`;
+
+    while (nextUrl) {
+      const res = await fetch(nextUrl, {
+        headers: { Authorization: `Bearer ${zdAccessToken}` }
+      });
+      if (res.status === 401) {
+        zdAccessToken = '';
+        sessionStorage.removeItem('zd_token');
+        setZdStatus('err', '토큰 만료 — 다시 로그인해주세요.');
+        resetLoginBtn(); return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const d = await res.json();
+
+      const userMap = {}, orgMap = {};
+      (d.users        || []).forEach(u => { userMap[u.id] = u; });
+      (d.organizations|| []).forEach(o => { orgMap[o.id]  = o; });
+
+      const statusMap = { open:'등록', pending:'보류', hold:'대기', solved:'해결', closed:'해결' };
+      const cf = (t, id) => (t.custom_fields || []).find(f => String(f.id) === String(id))?.value ?? '';
+
+      (d.tickets || []).forEach(t => {
+        const assignee  = userMap[t.assignee_id]     || {};
+        const requester = userMap[t.requester_id]    || {};
+        const org       = orgMap[t.organization_id]  || {};
+        allRows.push({
+          ' ID':             t.id,
+          '티켓 상태':        statusMap[t.status] || t.status,
+          '조직':             org.name  || '',
+          '대상시스템':        cf(t, 360014879433) || '',
+          '요청일':           (t.created_at || '').slice(0, 10),
+          '제목':             t.subject || '',
+          '요청자':           requester.name || '',
+          '종료일':           t.solved_at ? t.solved_at.slice(0, 10) : '',
+          '고객 소요시간(H)':  cf(t, 360014879453) || "'-",
+          '처리자':           assignee.name  || '',
+          'CSR 유형':         cf(t, 360014879473) || '',
+          '처리내역':          cf(t, 360014879493) || '',
+          '전체 소요시간(H)':  cf(t, 360014879513) || "'-",
+          '요청 날짜':        t.created_at || '',
+          '업데이트 시간':     t.updated_at || '',
+        });
+      });
+      nextUrl = d.next_page || null;
+      setZdStatus('loading', `${allRows.length}건 로드 중...`);
+    }
+
+    ZC = Object.keys(allRows[0] || {});
+    ZR = allRows.map(r => applyIdMapping(r));
+    setZdStatus('ok', `✓ ${allRows.length}건 로드 완료`);
+    if (btn) { btn.textContent = `✓ ${allRows.length}건 (다시 불러오기)`; btn.disabled = false; }
+    setupAfterLoad(`Zendesk API (${allRows.length}건)`);
+
   } catch(e) {
     setZdStatus('err', '불러오기 실패: ' + e.message);
     resetLoginBtn();
@@ -1493,18 +1564,12 @@ async function zdLoadTickets() {
 function setupAfterLoad(name) {
   document.getElementById('lbl-zd').textContent = `✓ ${name}`;
   document.getElementById('lbl-zd').classList.remove('hidden');
-  const wSel = document.getElementById('fw');
-  wSel.innerHTML = '<option value="">전체</option>';
   const wc = fc(['처리자','assignee','agent']);
-  if (wc) [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort().forEach(w => {
-    const o = document.createElement('option'); o.value = o.textContent = w; wSel.appendChild(o);
-  });
-  ['mfw','wk-fw','day-fw'].forEach(id => {
+  const workers = wc ? [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort() : [];
+  ['fw','mfw','wk-fw','day-fw'].forEach(id => {
     const sel = document.getElementById(id); if (!sel) return;
     sel.innerHTML = '<option value="">전체</option>';
-    [...new Set(ZR.map(r => r[wc]).filter(Boolean))].sort().forEach(w => {
-      const o = document.createElement('option'); o.value = o.textContent = w; sel.appendChild(o);
-    });
+    workers.forEach(w => { const o = document.createElement('option'); o.value = o.textContent = w; sel.appendChild(o); });
   });
   const today = new Date(), dow = today.getDay() === 0 ? 7 : today.getDay();
   const pm = new Date(today); pm.setDate(today.getDate() - dow - 6);
@@ -1516,7 +1581,7 @@ function setupAfterLoad(name) {
   stab2('zd');
 }
 
-// ── 설정 규칙 저장소// ── 설정 규칙 저장소
+// ── 설정 규칙 저장소// ── 설정 규칙 저장소// ── 설정 규칙 저장소
 let SETTINGS = []; // [{id, rule, raw}]
 
 function parseSettings(wb) {
