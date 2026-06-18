@@ -1330,12 +1330,15 @@ const SITE_TYPE_MAP = {
   '그리티':'단독형','PACM자산운용':'유상','에스델':'단독형','공유형':'공유형','구독관리':'구독관리',
 };
 // API 대상시스템 value → 표준 name 변환 (Zendesk custom_field_options 기준)
+// API 대상시스템 value → 표준 name 변환
 const API_SYS_MAP = {
+  // 공유형/구독관리
   'gownet_rental':       '[고우넷] 렌탈관리',
   'gownet_goworks':      '[공유형] GoWorks',
   'gowit_goworks':       '[고우아이티] GoWorks',
   'gowit_rental':        '[고우아이티] 구독관리',
   'gowit_rental_cloud':  '[고우아이티] 구독관리 (클라우드)',
+  // GoWorks 유상
   'koreanre_goworks':    '[코리안리] GoWorks',
   '코리안리_goworks':     '[코리안리] GoWorks',
   'kinkos_goworks':      '[킨코스] GoWorks',
@@ -1354,50 +1357,52 @@ const API_SYS_MAP = {
   '_무상__goworks':       '[무상] GoWorks',
   '_pacm__goworks':      '[PACM] GoWorks',
   '_공유형__goworks':     '[공유형] GoWorks',
-  '금호_pms':             '[금호] PMS',
-  '덕신_mes':             '[덕신] MES',
-  'deloitte':            '[딜로이트] 통합유지보수',
-  '인지디스플레이_pms':   '[인지디스플레이] PMS',
-  '인지컨트롤스_pms':     '[인지컨트롤스] PMS',
-  '창성_mes':             '[창성] MES',
-  '한경_전산용품_납품':   '[한경] 전산용품 납품',
-  '한국영상자료원_ams':   '[한국영상자료원] AMS',
-  '현대엔지비_pms':       '[현대엔지비] PMS',
-  '현대위아_pms':         '[현대위아] PMS',
-  'alcom_mes':            '[ALCOM] MES',
-  'eng_lims':             '[ENG] LIMS',
-  'estech_lims':          '[ESTECH] LIMS',
-  'ipwin_wats':           '[IPWIN] WATS',
-  'jtikorea_eshop':       '[JTI] 통합 유지보수',
-  'kes_lims':             '[KES] LIMS',
-  'kpmg_aim':             '[KPMG] AIM',
-  'kpmg_ems':             '[KPMG] EMS',
-  'mahle_mes':            '[MAHLE] MES',
-  'novelis_mes':          '[Novelis] MES',
-  'novelis_mts':          '[Novelis] MTS',
-  'novelis_mdm':          '[Novelis] MDM',
-  'novelis_powerapps':    '[Novelis] PowerApps',
-  'novelis_bi':           '[Novelis] BI',
-  'ob맥주_backup':        '[OB맥주] 유지보수 Backup',
-  'ucs_lims':             '[UCS] LIMS',
-  '극동전선_eai':         '#종료 [EAI] 극동전선',
-  '한미약품__eai':        '[한미약품] EAI',
-  '한화토탈__eai':        '[한화토탈] EAI',
-  'gs칼텍스__eai':        '[GS칼텍스] EAI',
-  '하림산업__eai':        '[하림산업] EAI',
-  '피유코어__eai_':       '[피유코어] EAI',
-  '대덕전자__eai':        '[대덕전자] EAI',
-  '마이크로웍스__eai':    '[마이크로웍스] EAI',
+  // 기타
+  '금호_pms':'[금호] PMS','덕신_mes':'[덕신] MES','deloitte':'[딜로이트] 통합유지보수',
+  '인지디스플레이_pms':'[인지디스플레이] PMS','인지컨트롤스_pms':'[인지컨트롤스] PMS',
+  '창성_mes':'[창성] MES','한경_전산용품_납품':'[한경] 전산용품 납품',
+  '한국영상자료원_ams':'[한국영상자료원] AMS','현대엔지비_pms':'[현대엔지비] PMS',
+  '현대위아_pms':'[현대위아] PMS','alcom_mes':'[ALCOM] MES','eng_lims':'[ENG] LIMS',
+  'estech_lims':'[ESTECH] LIMS','ipwin_wats':'[IPWIN] WATS','jtikorea_eshop':'[JTI] 통합 유지보수',
+  'kes_lims':'[KES] LIMS','kpmg_aim':'[KPMG] AIM','kpmg_ems':'[KPMG] EMS',
+  'mahle_mes':'[MAHLE] MES','novelis_mes':'[Novelis] MES','novelis_mts':'[Novelis] MTS',
+  'novelis_mdm':'[Novelis] MDM','novelis_powerapps':'[Novelis] PowerApps','novelis_bi':'[Novelis] BI',
+  'ob맥주_backup':'[OB맥주] 유지보수 Backup','ucs_lims':'[UCS] LIMS',
+  '극동전선_eai':'#종료 [EAI] 극동전선','한미약품__eai':'[한미약품] EAI',
+  '한화토탈__eai':'[한화토탈] EAI','gs칼텍스__eai':'[GS칼텍스] EAI',
+  '하림산업__eai':'[하림산업] EAI','피유코어__eai_':'[피유코어] EAI',
+  '대덕전자__eai':'[대덕전자] EAI','마이크로웍스__eai':'[마이크로웍스] EAI',
 };
 
+// value → 표준 name 변환 후 getSiteName으로 사이트 결정
 function apiSysToStd(val) {
   if(!val) return '';
-  // 정확한 value 매핑 우선
   if(API_SYS_MAP[val]) return API_SYS_MAP[val];
-  // 이미 표준 형식이면 그대로
   if(val.startsWith('[')) return val;
   return val;
 }
+
+// API value → 사이트명 직접 변환 (getSiteName 생략 가능한 경우)
+const API_VALUE_TO_SITE = {
+  'gownet_rental':       '공유형',
+  'gownet_goworks':      '공유형',
+  'gowit_goworks':       '구독관리',
+  'gowit_rental':        '구독관리',
+  'gowit_rental_cloud':  '구독관리',
+  'koreanre_goworks':    '코리안리',
+  '코리안리_goworks':     '코리안리',
+  'kinkos_goworks':      '킨코스코리아',
+  'cinos_goworks':       '싸이노스',
+  '인알파코리아_goworks': '인알파',
+  '세아윈드_goworks':     '세아윈드',
+  '파카코리아_goworks':   '파카코리아',
+  'islt_goworks':        '일성 ISLT',
+  'atgc_goworks':        'ATGC',
+  '부릉_goworks':         '부릉',
+  '_무상__goworks':       null,  // 조직명으로 결정
+  '_pacm__goworks':      'PACM자산운용',
+  '_공유형__goworks':     '공유형',
+};
 
 function getSiteType(site) { return SITE_TYPE_MAP[site] || '단독형'; }
 function tbadge(t) {
@@ -1804,7 +1809,9 @@ function buildMonthlyData() {
     monthSet.add(monthKey);
 
     // 사이트: applyIdMapping에서 '사이트' 필드가 있으면 우선 사용
-    const site = r['사이트'] || getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(r[ZSY]||r['대상시스템']||''));
+    const _rawSys = r[ZSY]||r['대상시스템']||'';
+    const _mapped = API_VALUE_TO_SITE[_rawSys];
+    const site = r['사이트'] || (_mapped !== undefined ? (_mapped || getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys))) : getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(_rawSys)));
 
     // 설정 시트 월별 분할 규칙 적용
     if (r['_split_rules'] && r['_split_rules'].length > 0) {
@@ -1936,7 +1943,9 @@ function buildWeeklyData() {
     const reqDate = pd(r[ZQC]||'') || pd(r[ZQF]||'') || getEffDate(r);
     if(!reqDate) return;
     const {key}=getWeekKey(reqDate);
-    const site=r['사이트']||getSiteName(r[ZOC]||r['조직']||'', apiSysToStd(r[ZSY]||r['대상시스템']||''));
+    const _rawSysW = r[ZSY]||r['대상시스템']||'';
+    const _mappedW = API_VALUE_TO_SITE[_rawSysW];
+    const site=r['사이트']||(_mappedW!==undefined?(_mappedW||getSiteName(r[ZOC]||r['조직']||'',apiSysToStd(_rawSysW))):getSiteName(r[ZOC]||r['조직']||'',apiSysToStd(_rawSysW)));
     if(!wkData[key]) wkData[key]={};
     if(!wkData[key][site]) wkData[key][site]={c:0,n:0,rows:[]};
     wkData[key][site].c+=c; wkData[key][site].n+=n; wkData[key][site].rows.push(r);
